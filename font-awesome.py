@@ -1,3 +1,7 @@
+"""
+A non-working implementation of font-awesome in python.
+"""
+
 import os
 import math
 import sys
