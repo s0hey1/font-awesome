@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <wchar.h>
 #include <locale.h>
 #include <png.h>
@@ -14,6 +15,9 @@
 #define FREETYPE_DPI 100
 #define PNG_PIXELSIZE 4
 #define PNG_PIXELDEPTH 8
+#define FONTAWESOME_VERSION_MAJOR 1
+#define FONTAWESOME_VERSION_MINOR 0
+#define FONTAWESOME_VERSION_PATCH 0
 
 typedef struct{
 	uint8_t r;
@@ -53,10 +57,30 @@ void draw_bitmap(bitmap_t * image, FT_Bitmap * bitmap, int x, int y){
 	}
 }
 
+int show_version(){
+	printf("font-awesome version %d.%d.%d\n",
+			FONTAWESOME_VERSION_MAJOR,
+			FONTAWESOME_VERSION_MINOR,
+			FONTAWESOME_VERSION_PATCH);
+	return 0;
+}
+
+int show_help(){
+	printf("usage: font-awesome [-v] [-f filename] [-s fontsize]\n");
+	printf("\n");
+	printf("font-awesome takes text through stdin and using freetype\n");
+	printf("and libpng draws a png using the specified font and the\n");
+	printf("specified size.\n");
+	printf("Debug stuff comes out of stderr, and if you use -v flag\n");
+	printf("more debug stuff shows up.\n");
+	return 0;
+}
+
 int main(int argc, char** argv){
 
 	char *argv_filename = NULL;
 	int argv_fontsize = 32;
+	bool argv_verbose = false;
 
 	wchar_t text[TEXT_LENGTH_LIMIT];
 	wchar_t c;
@@ -66,6 +90,7 @@ int main(int argc, char** argv){
 	int minx, miny, maxx, maxy;
 	int width, height;
 	int offset;
+
 	FT_Library library;
 	FT_Error error;
 	FT_Face face;
@@ -80,21 +105,30 @@ int main(int argc, char** argv){
 	pixel_t * pixel;
 
 	setlocale(LC_ALL, "");
-	fprintf(stderr, "wchar_t is %d\n", sizeof(wchar_t));
-	fprintf(stderr, "Hello world\n");
 
 	for (i=1; i < argc; i++){
 		if (argv[i][0] == '-'){
+			if ((strcmp(argv[i], "--version"))==0){
+				return show_version();
+				break;
+			}
 			switch (argv[i][1]){
+				case 'h':
+					return show_help();
+					break;
 				case 'f':
 					argv_filename = argv[++i];
 					break;
 				case 's':
 					argv_fontsize = atoi(argv[++i]);
 					break;
+				case 'v':
+					argv_verbose = true;
+					break;
 			}
 		}
 	}
+
 	if (argv_filename == NULL){
 		fprintf(stderr, "no file (use -f flag)\n");
 		return 1;
@@ -102,18 +136,24 @@ int main(int argc, char** argv){
 
 	freopen(NULL, "rb", stdin);
 	i = 0;
+
+	if (argv_verbose){
+		fprintf(stderr, "wchar_t is %d\n", sizeof(wchar_t));
+		fprintf(stderr, "stdin codepoints are as follows:\n");
+	}
+
 	while(1){
 		c = fgetwc(stdin);
 		if (c == 10){ /* line feed */
 			continue;
 		}
 		if (c == WEOF){
-			fprintf(stderr, "hit WEOF\n");
-			fprintf(stderr, "EOF: %02x\n", c);
 			break;
 		}
 		text[text_length] = c;
-		fprintf(stderr, "%d: %02x\n", text_length, c);
+		if (argv_verbose){
+			fprintf(stderr, "%d: %02x\n", text_length, c);
+		}
 		text_length++;
 	}
 
@@ -180,7 +220,7 @@ int main(int argc, char** argv){
 
 	png_infotext.compression = PNG_TEXT_COMPRESSION_NONE;
 	png_infotext.key = "Title";
-	png_infotext.text = "Love, ColourLovers";
+	png_infotext.text = "Love, COLOURLovers";
 	png_set_text(png_ptr, info_ptr, &png_infotext, 1);
 	png_write_info(png_ptr, info_ptr);
 	png_set_packing(png_ptr);

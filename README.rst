@@ -7,8 +7,7 @@ font-awesome is a command line tool to render TTF/OTF fonts to PNG.
 Dependencies
 ============
 
-font-awesome requires freetype, libpng, and maybe some unicode
-library once I figure out how to fix the unicode problems.
+font-awesome requires freetype, libpng, and gcc stuff.
 
 
 Compiling
@@ -33,14 +32,21 @@ You can still test it on the command line using:
 
 ::
 
-    $ cat "Hello world" | font-awesome -f in_file.ttf -s 36 > output.png
+    $ cat "Hello world" | ./font-awesome -f in_file.ttf -s 36 > output.png
+
+
+You can test the unicode capabilities using:
+
+::
+
+    $ cat unicode_sample.txt | ./font-awesome -f testfonts/5.otf -s 62 -v > output.png
+
 
 TODO
 ====
 
   * Fix Python version (it used to segfault, and now it doesn't but
     it also no longer works right)
-  * Make font-awesome unicode aware
 
 Contributors
 ============
