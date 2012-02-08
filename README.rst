@@ -35,6 +35,13 @@ You can still test it on the command line using:
 
     $ cat "Hello world" | font-awesome -f in_file.ttf -s 36 > output.png
 
+TODO
+====
+
+  * Fix Python version (it used to segfault, and now it doesn't but
+    it also no longer works right)
+  * Make font-awesome unicode aware
+
 Contributors
 ============
 
