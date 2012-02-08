@@ -59,6 +59,7 @@ int main(int argc, char** argv){
 	int argv_fontsize = 32;
 
 	wchar_t text[TEXT_LENGTH_LIMIT];
+	wchar_t c;
 	int text_length = 0;
 	int i, j;
 	int _l, _t;
@@ -99,13 +100,22 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	fgetws(text, TEXT_LENGTH_LIMIT, stdin);
-	text_length = wcslen(text);
-	fprintf(stderr, "textlength is: %d\n", text_length);
-	fprintf(stderr, "%ls\n", text);
-	for (i = 0; i < text_length; i++){
-		fprintf(stderr, "char %d: %d\n", i, text[i]);
-	};
+	freopen(NULL, "rb", stdin);
+	i = 0;
+	while(1){
+		c = fgetwc(stdin);
+		if (c == 10){ /* line feed */
+			continue;
+		}
+		if (c == WEOF){
+			fprintf(stderr, "hit WEOF\n");
+			fprintf(stderr, "EOF: %02x\n", c);
+			break;
+		}
+		text[text_length] = c;
+		fprintf(stderr, "%d: %02x\n", text_length, c);
+		text_length++;
+	}
 
 	error = FT_Init_FreeType(&library);
 	if (error){
