@@ -138,7 +138,7 @@ int main(int argc, char** argv){
 	i = 0;
 
 	if (argv_verbose){
-		fprintf(stderr, "wchar_t is %d\n", sizeof(wchar_t));
+		fprintf(stderr, "wchar_t is %zu\n", sizeof(wchar_t));
 		fprintf(stderr, "stdin codepoints are as follows:\n");
 	}
 

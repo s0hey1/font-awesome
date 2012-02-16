@@ -2,7 +2,7 @@ DEBUG=1
 DEBUGFLAG=
 CC=gcc
 LDFLAGS=-lfreetype -lpng
-CFLAGS=-Wall -pedantic -I/usr/include/freetype2
+CFLAGS=-Wall -std=c99 -pedantic -I/usr/include/freetype2
 PROG=font-awesome
 SRCDIR=src
 OBJDIR=obj
