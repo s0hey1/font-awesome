@@ -71,13 +71,18 @@ int show_version(){
 }
 
 int show_help(){
-	printf("usage: font-awesome [-v] [-f filename] [-s fontsize]\n");
+	printf("usage: font-awesome [flags] [-f filename] [-s fontsize]\n");
 	printf("\n");
-	printf("font-awesome takes text through stdin and using freetype\n");
-	printf("and libpng draws a png using the specified font and the\n");
-	printf("specified size.\n");
-	printf("Debug stuff comes out of stderr, and if you use -v flag\n");
-	printf("more debug stuff shows up.\n");
+	printf("font-awesome takes text through stdin and draws a png using the specified\n");
+	printf("font and size.\n");
+	printf("\n");
+	printf("png output goes out through stdout. debug info goes out through stderr.\n");
+	printf("\n");
+	printf("available flags:\n");
+	printf("  -v               more verbose output\n"); 
+	printf("  -h | --help      show this help\n"); 
+	printf("  --version        show version\n"); 
+	printf("  --gracefulempty  output 1x1 empty png when image has 0 area\n"); 
 	return 0;
 }
 
@@ -112,17 +117,18 @@ int main(int argc, char** argv){
 
 	for (i=1; i < argc; i++){
 		if (argv[i][0] == '-'){
-			if ((strcmp(argv[i], "--version"))==0){
+			if (strcmp(argv[i], "--version") == 0){
 				return show_version();
 				break;
 			}
-			if ((strcmp(argv[i], "--gracefulempty"))==0){
+			if (strcmp(argv[i], "--gracefulempty") == 0){
 				flags |= FONTAWESOME_FLAG_GRACEFULEMPTY;
 			}
+			if ((strcmp(argv[i], "--help") == 0) |
+					(strcmp(argv[i], "-h") == 0)){
+				return show_help();
+			}
 			switch (argv[i][1]){
-				case 'h':
-					return show_help();
-					break;
 				case 'f':
 					argv_filename = argv[++i];
 					break;
@@ -146,7 +152,6 @@ int main(int argc, char** argv){
 		fprintf(stderr, "stdin codepoints are as follows:\n");
 	}
 
-	freopen(NULL, "rb", stdin);
 	while(1){
 		c = fgetwc(stdin);
 		if (c == 10){ /* line feed */
