@@ -152,7 +152,7 @@ int main(int argc, char** argv){
 		}
 		text[text_length] = c;
 		if (argv_verbose){
-			fprintf(stderr, "%d: %02x\n", text_length, c);
+			fprintf(stderr, "%d: 0x%X (%lc)\n", text_length, (wint_t)c, (wint_t)c);
 		}
 		text_length++;
 	}
