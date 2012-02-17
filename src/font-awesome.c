@@ -213,10 +213,9 @@ int main(int argc, char** argv){
 		flags |= FONTAWESOME_FLAG_HASERROR;
 		flags |= FONTAWESOME_FLAG_EMPTY;
 
-		if (flags | FONTAWESOME_FLAG_GRACEFULEMPTY){
-			if (flags | FONTAWESOME_FLAG_VERBOSE){
+		if (flags & FONTAWESOME_FLAG_GRACEFULEMPTY){
+			if (flags & FONTAWESOME_FLAG_VERBOSE){
 				fprintf(stderr, "Empty image, returning 1x1 empty png\n");
-				goto GOTO_ERROR_FT;
 			}
 		}else{
 			goto GOTO_ERROR_FT;
@@ -226,8 +225,8 @@ int main(int argc, char** argv){
 	pen.x = (0 - minx) * 64;
 	pen.y = maxy * 64;
 
-	image.width = (flags | FONTAWESOME_FLAG_EMPTY) ? 1: width;
-	image.height = (flags | FONTAWESOME_FLAG_EMPTY) ? 1 :  height;
+	image.width = (flags & FONTAWESOME_FLAG_EMPTY) ? 1: width;
+	image.height = (flags & FONTAWESOME_FLAG_EMPTY) ? 1 :  height;
 	image.pixels = calloc (sizeof(pixel_t), image.width * image.height);
 
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -246,21 +245,21 @@ int main(int argc, char** argv){
 	png_set_packing(png_ptr);
 
 	row = (png_bytep) malloc(sizeof(png_byte) * PNG_PIXELSIZE * image.width);
-	if (flags | FONTAWESOME_FLAG_EMPTY){
+	if (flags & FONTAWESOME_FLAG_EMPTY){
 		memset(row, 0, sizeof(row));
 		png_write_row(png_ptr, row);
 	}else{
 		for (i = 0; i < text_length; i++){
 			FT_Set_Transform(face, NULL, &pen);
 			FT_Load_Char(face, text[i], FT_LOAD_RENDER);
-			draw_bitmap(&image, &slot->bitmap, slot->bitmap_left, height - slot->bitmap_top);
+			draw_bitmap(&image, &slot->bitmap, slot->bitmap_left, image.height - slot->bitmap_top);
 			pen.x += slot->advance.x;
 			pen.y += slot->advance.y;
 		}
 
-		for (i=0; i<height; i++){
+		for (i=0; i<image.height; i++){
 			memset(row, 0, sizeof(row));
-			for (j=0; j<width; j++){
+			for (j=0; j<image.width; j++){
 				offset = j * PNG_PIXELSIZE;
 				pixel = pixel_at(&image, j, i);
 				row[offset] = pixel->r;
