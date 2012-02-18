@@ -11,7 +11,7 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define TEXT_LENGTH_LIMIT 255
 #define FREETYPE_DPI 100
-#define PNG_PIXELSIZE sizeof(png_bytep)
+#define PNG_PIXELSIZE 4
 #define PNG_PIXELDEPTH 8
 #define FONTAWESOME_VERSION_MAJOR 1
 #define FONTAWESOME_VERSION_MINOR 0
@@ -136,6 +136,7 @@ int main(int argc, char** argv){
 		fprintf(stderr, "wchar_t is %zu\n", sizeof(wchar_t));
 		fprintf(stderr, "int is %zu\n", sizeof(int));
 		fprintf(stderr, "png_bytep is %zu\n", sizeof(png_bytep));
+		fprintf(stderr, "png_byte is %zu\n", sizeof(png_byte));
 		fprintf(stderr, "stdin codepoints are as follows:\n");
 	}
 
