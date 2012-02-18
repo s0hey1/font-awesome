@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <wchar.h>
 #include <locale.h>
 #include <png.h>
@@ -12,7 +11,7 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define TEXT_LENGTH_LIMIT 255
 #define FREETYPE_DPI 100
-#define PNG_PIXELSIZE 4
+#define PNG_PIXELSIZE sizeof(png_bytep)
 #define PNG_PIXELDEPTH 8
 #define FONTAWESOME_VERSION_MAJOR 1
 #define FONTAWESOME_VERSION_MINOR 0
@@ -24,39 +23,28 @@
 #define FONTAWESOME_FLAG_VERBOSE       0x4
 #define FONTAWESOME_FLAG_GRACEFULEMPTY 0x8
 
-typedef struct{
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-	uint8_t a;
-} pixel_t;
-
-typedef struct{
-	pixel_t *pixels;
-	size_t width;
-	size_t height;
-} bitmap_t;
-
-static pixel_t * pixel_at (bitmap_t * bitmap, int x, int y){
-	return bitmap->pixels + bitmap->width * y + x;
+static png_byte * pixel_at (png_bytep * rows, int x, int y){
+	png_byte * row;
+	row = rows[y];
+	return &row[x * PNG_PIXELSIZE];
 }
 
-void draw_bitmap(bitmap_t * image, FT_Bitmap * bitmap, int x, int y){
+void blit_bitmap(png_bytep * rows, FT_Bitmap * bitmap, int x, int y){
 	int i, j;
 	int w, h;
 	int v;
-	pixel_t * pixel;
+	png_byte * pixel;
 	w = bitmap->width;
 	h = bitmap->rows;
 	for (i=0; i < w; i++){
 		for (j=0; j < h; j++){
 			v = bitmap->buffer[j * w + i];
 			if (v != 0){
-				pixel = pixel_at(image, x + i, y + j);
-				pixel->r = 0;
-				pixel->g = 0;
-				pixel->b = 0;
-				pixel->a = MAX(pixel->a, v);
+				pixel = pixel_at(rows, x + i, y + j);
+				pixel[0] = 0;
+				pixel[1] = 0;
+				pixel[2] = 0;
+				pixel[3] = MAX(pixel[3], v);
 			}
 		}
 	}
@@ -94,24 +82,21 @@ int main(int argc, char** argv){
 	wchar_t text[TEXT_LENGTH_LIMIT];
 	wchar_t c;
 	int text_length = 0;
-	int i, j;
+	int i;
 	int _l, _t;
 	int minx, miny, maxx, maxy;
 	int width, height;
-	int offset;
 	int flags = 0;
 
 	FT_Library library;
 	FT_Face face;
 	FT_Vector pen;
 	FT_GlyphSlot slot;
-	bitmap_t image;
 
 	png_structp png_ptr;
 	png_infop info_ptr;
-	png_bytep row;
+	png_bytep * rows;
 	png_text png_infotext;
-	pixel_t * pixel;
 
 	setlocale(LC_ALL, "");
 
@@ -149,6 +134,8 @@ int main(int argc, char** argv){
 
 	if (flags & FONTAWESOME_FLAG_VERBOSE){
 		fprintf(stderr, "wchar_t is %zu\n", sizeof(wchar_t));
+		fprintf(stderr, "int is %zu\n", sizeof(int));
+		fprintf(stderr, "png_bytep is %zu\n", sizeof(png_bytep));
 		fprintf(stderr, "stdin codepoints are as follows:\n");
 	}
 
@@ -225,15 +212,14 @@ int main(int argc, char** argv){
 	pen.x = (0 - minx) * 64;
 	pen.y = maxy * 64;
 
-	image.width = (flags & FONTAWESOME_FLAG_EMPTY) ? 1: width;
-	image.height = (flags & FONTAWESOME_FLAG_EMPTY) ? 1 :  height;
-	image.pixels = calloc (sizeof(pixel_t), image.width * image.height);
+	width = (flags & FONTAWESOME_FLAG_EMPTY) ? 1: width;
+	height = (flags & FONTAWESOME_FLAG_EMPTY) ? 1 : height;
 
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	info_ptr = png_create_info_struct(png_ptr);
 	png_init_io(png_ptr, stdout);
 
-	png_set_IHDR(png_ptr, info_ptr, image.width, image.height,
+	png_set_IHDR(png_ptr, info_ptr, width, height,
 		PNG_PIXELDEPTH, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
@@ -244,33 +230,25 @@ int main(int argc, char** argv){
 	png_write_info(png_ptr, info_ptr);
 	png_set_packing(png_ptr);
 
-	row = (png_bytep) malloc(sizeof(png_byte) * PNG_PIXELSIZE * image.width);
+	rows = (png_bytep *) malloc(sizeof(png_bytep) * height);
+	for (i = 0; i < height; i++){
+		rows[i] = (png_byte*) calloc(PNG_PIXELSIZE, width);
+	}
+
 	if (flags & FONTAWESOME_FLAG_EMPTY){
-		memset(row, 0, sizeof(row));
-		png_write_row(png_ptr, row);
 	}else{
 		for (i = 0; i < text_length; i++){
 			FT_Set_Transform(face, NULL, &pen);
 			FT_Load_Char(face, text[i], FT_LOAD_RENDER);
-			draw_bitmap(&image, &slot->bitmap, slot->bitmap_left, image.height - slot->bitmap_top);
+			blit_bitmap(rows, &slot->bitmap, slot->bitmap_left, height - slot->bitmap_top);
 			pen.x += slot->advance.x;
 			pen.y += slot->advance.y;
 		}
-
-		for (i=0; i<image.height; i++){
-			memset(row, 0, sizeof(row));
-			for (j=0; j<image.width; j++){
-				offset = j * PNG_PIXELSIZE;
-				pixel = pixel_at(&image, j, i);
-				row[offset] = pixel->r;
-				row[offset + 1] = pixel->g;
-				row[offset + 2] = pixel->b;
-				row[offset + 3] = pixel->a;
-			}
-			png_write_row(png_ptr, row);
-		}
 	}
-	if (row != NULL) free(row);
+	for (i = 0; i < height; i++){
+		png_write_row(png_ptr, rows[i]);
+		free(rows[i]);
+	}
 
 	png_write_end(png_ptr, NULL);
 
