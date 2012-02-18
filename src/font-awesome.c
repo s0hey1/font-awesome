@@ -99,6 +99,7 @@ int main(int argc, char** argv){
 	png_text png_infotext;
 
 	setlocale(LC_ALL, "");
+	freopen(NULL, "rb", stdin);
 
 	for (i=1; i < argc; i++){
 		if (argv[i][0] == '-'){
