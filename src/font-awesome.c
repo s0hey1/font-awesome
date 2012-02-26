@@ -14,14 +14,15 @@
 #define PNG_PIXELSIZE 4
 #define PNG_PIXELDEPTH 8
 #define FONTAWESOME_VERSION_MAJOR 1
-#define FONTAWESOME_VERSION_MINOR 0
-#define FONTAWESOME_VERSION_PATCH 1
+#define FONTAWESOME_VERSION_MINOR 1
+#define FONTAWESOME_VERSION_PATCH 0
 
 //Flags
 #define FONTAWESOME_FLAG_HASERROR      0x1
 #define FONTAWESOME_FLAG_EMPTY         0x2
 #define FONTAWESOME_FLAG_VERBOSE       0x4
 #define FONTAWESOME_FLAG_GRACEFULEMPTY 0x8
+#define FONTAWESOME_FLAG_AS_CODEPOINTS 0x10
 
 static png_byte * pixel_at (png_bytep * rows, int x, int y){
 	png_byte * row;
@@ -79,6 +80,7 @@ int main(int argc, char** argv){
 	char *argv_filename = NULL;
 	int argv_fontsize = 32;
 
+	char buffer[256];
 	wchar_t text[TEXT_LENGTH_LIMIT];
 	wchar_t c;
 	int text_length = 0;
@@ -109,6 +111,9 @@ int main(int argc, char** argv){
 			}
 			if (strcmp(argv[i], "--gracefulempty") == 0){
 				flags |= FONTAWESOME_FLAG_GRACEFULEMPTY;
+			}
+			if (strcmp(argv[i], "--as-codepoints") == 0){
+				flags |= FONTAWESOME_FLAG_AS_CODEPOINTS;
 			}
 			if ((strcmp(argv[i], "--help") == 0) |
 					(strcmp(argv[i], "-h") == 0)){
@@ -142,7 +147,16 @@ int main(int argc, char** argv){
 	}
 
 	while(1){
-		c = fgetwc(stdin);
+		if (flags & FONTAWESOME_FLAG_AS_CODEPOINTS){
+			// Take input as series of long integars
+			if (fscanf(stdin, "%s", buffer) != 1){
+				break;
+			}
+			c = atoi(buffer);
+		}else{
+			// Take input from stdin as in (locale-aware)
+			c = fgetwc(stdin);
+		}
 		if (c == 10){ /* line feed */
 			continue;
 		}
