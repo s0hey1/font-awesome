@@ -28,7 +28,7 @@ function utf8_to_unicode($str) {
 
 mb_internal_encoding("UTF-8");
 $pipes = array();
-$cmd = "./font-awesome -v --as-codepoints -f testfonts/5.ttf >output.png";
+$cmd = "./font-awesome -v --as-codepoints -f testfonts/1.ttf >output.png";
 $desc = array(
 	array("pipe", "rb"),
 	array("pipe", "wb"),

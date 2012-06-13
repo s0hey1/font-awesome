@@ -241,7 +241,7 @@ int main(int argc, char** argv){
 
 	png_infotext.compression = PNG_TEXT_COMPRESSION_NONE;
 	png_infotext.key = "Title";
-	png_infotext.text = "Love, COLOURlovers";
+	png_infotext.text = "Love, Creative Market";
 	png_set_text(png_ptr, info_ptr, &png_infotext, 1);
 	png_write_info(png_ptr, info_ptr);
 	png_set_packing(png_ptr);
@@ -280,4 +280,3 @@ int main(int argc, char** argv){
 
 	return (flags & FONTAWESOME_FLAG_HASERROR) ? 1 : 0;
 }
-
