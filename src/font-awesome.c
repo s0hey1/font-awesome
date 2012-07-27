@@ -11,6 +11,7 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define TEXT_LENGTH_LIMIT 255
 #define FREETYPE_DPI 100
+#define FREETYPE_PEN_DPI 64
 #define PNG_PIXELSIZE 4
 #define PNG_PIXELDEPTH 8
 #define FONTAWESOME_VERSION_MAJOR 1
@@ -23,8 +24,23 @@
 #define FONTAWESOME_FLAG_VERBOSE       0x4
 #define FONTAWESOME_FLAG_GRACEFULEMPTY 0x8
 #define FONTAWESOME_FLAG_AS_CODEPOINTS 0x10
+#define FONTAWESOME_FLAG_FIX_MISSING_MISSING 0x20
 
+//Globals
+int LimitWidth = 0;
+int LimitHeight = 0;
+
+static void draw_pixel(png_byte * pixel, int r, int g, int b, int a){
+	pixel[0] = r;
+	pixel[1] = g;
+	pixel[2] = b;
+	pixel[3] = a;
+}
 static png_byte * pixel_at (png_bytep * rows, int x, int y){
+	if (x >= LimitWidth || y >= LimitHeight){
+		x = 0;
+		y = 0;
+	}
 	png_byte * row;
 	row = rows[y];
 	return &row[x * PNG_PIXELSIZE];
@@ -42,12 +58,36 @@ void blit_bitmap(png_bytep * rows, FT_Bitmap * bitmap, int x, int y){
 			v = bitmap->buffer[j * w + i];
 			if (v != 0){
 				pixel = pixel_at(rows, x + i, y + j);
-				pixel[0] = 0;
-				pixel[1] = 0;
-				pixel[2] = 0;
-				pixel[3] = MAX(pixel[3], v);
+				draw_pixel(pixel, 0, 0, 0, MAX(pixel[3], v));
 			}
 		}
+	}
+}
+
+void draw_empty_glyph(png_bytep * rows, int x, int y, int w, int h){
+	int i;
+	h--;
+	w--;
+	if (h > 4){
+		y += 2;
+		h -= 4;
+	}
+	if (w > 4){
+		x += 2;
+		w -= 4;
+	}
+	png_byte * pixel;
+	for (i=0; i < h; i++){
+		pixel = pixel_at(rows, x, y + i);
+		draw_pixel(pixel, 0, 0, 0, 255);
+		pixel = pixel_at(rows, x + w, y + i);
+		draw_pixel(pixel, 0, 0, 0, 255);
+	}
+	for (i=0; i < w; i++){
+		pixel = pixel_at(rows, x + i, y);
+		draw_pixel(pixel, 0, 0, 0, 255);
+		pixel = pixel_at(rows, x + i, y + h);
+		draw_pixel(pixel, 0, 0, 0, 255);
 	}
 }
 
@@ -72,6 +112,7 @@ int show_help(){
 	printf("  -h | --help      show this help\n"); 
 	printf("  --version        show version\n"); 
 	printf("  --gracefulempty  output 1x1 empty png when image has 0 area\n"); 
+	printf("  --fix0glyph      draw box if glyph 0 (missing glyph) has no substance\n");
 	return 0;
 }
 
@@ -89,6 +130,7 @@ int main(int argc, char** argv){
 	int minx, miny, maxx, maxy;
 	int width, height;
 	int flags = 0;
+	FT_UInt	index;
 
 	FT_Library library;
 	FT_Face face;
@@ -114,6 +156,9 @@ int main(int argc, char** argv){
 			}
 			if (strcmp(argv[i], "--as-codepoints") == 0){
 				flags |= FONTAWESOME_FLAG_AS_CODEPOINTS;
+			}
+			if (strcmp(argv[i], "--fix0glyph") == 0){
+				flags |= FONTAWESOME_FLAG_FIX_MISSING_MISSING;
 			}
 			if ((strcmp(argv[i], "--help") == 0) |
 					(strcmp(argv[i], "-h") == 0)){
@@ -182,7 +227,7 @@ int main(int argc, char** argv){
 		goto GOTO_ERROR_NEW_FACE;
 	}
 
-	if (FT_Set_Char_Size(face, 0, argv_fontsize * 64, FREETYPE_DPI, FREETYPE_DPI)){
+	if (FT_Set_Char_Size(face, 0, argv_fontsize * FREETYPE_PEN_DPI, FREETYPE_DPI, FREETYPE_DPI)){
 		fprintf(stderr, "error setting char_size\n");
 		flags |= FONTAWESOME_FLAG_HASERROR;
 		goto GOTO_ERROR_SET_CHAR_SIZE;
@@ -191,6 +236,22 @@ int main(int argc, char** argv){
 
 	pen.x = 0;
 	pen.y = 0;
+
+	// Examine missing glyph (glyph 0)
+	if (flags & FONTAWESOME_FLAG_FIX_MISSING_MISSING){
+		FT_Load_Glyph(face, 0, FT_LOAD_RENDER);
+		_t = 0 + slot->bitmap_top;
+		if (_t == 0){
+			if (flags & FONTAWESOME_FLAG_VERBOSE){
+				fprintf(stderr, "Missing glyph has no substance. Will hack in box.\n");
+			}
+		} else {
+			if (flags & FONTAWESOME_FLAG_VERBOSE){
+				fprintf(stderr, "Missing glyph exists. Unsetting flag.\n");
+			}
+			flags &= ~FONTAWESOME_FLAG_FIX_MISSING_MISSING;
+		}
+	}
 
 	// Measure glyphs first, to see how big of a canvas we need
 	minx = 0;
@@ -209,6 +270,8 @@ int main(int argc, char** argv){
 		pen.x += slot->advance.x;
 		pen.y += slot->advance.y;
 	}
+	maxx = MAX(maxx, pen.x/FREETYPE_PEN_DPI);
+	maxy = MAX(maxy, pen.y/FREETYPE_PEN_DPI);
 
 	width = maxx - minx;
 	height = maxy - miny;
@@ -227,11 +290,13 @@ int main(int argc, char** argv){
 	}
 
 	// Glyph measurement is done
-	pen.x = (0 - minx) * 64;
-	pen.y = maxy * 64;
+	pen.x = (0 - minx) * FREETYPE_PEN_DPI;
+	pen.y = maxy * FREETYPE_PEN_DPI;
 
 	width = (flags & FONTAWESOME_FLAG_EMPTY) ? 1: width;
 	height = (flags & FONTAWESOME_FLAG_EMPTY) ? 1 : height;
+	LimitWidth = width;
+	LimitHeight = height;
 
 	// Create image datastructure
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -258,9 +323,14 @@ int main(int argc, char** argv){
 	}else{
 		// Actual drawing happens here
 		for (i = 0; i < text_length; i++){
+			index = FT_Get_Char_Index(face, text[i]);
 			FT_Set_Transform(face, NULL, &pen);
 			FT_Load_Char(face, text[i], FT_LOAD_RENDER);
-			blit_bitmap(rows, &slot->bitmap, slot->bitmap_left, height - slot->bitmap_top);
+			if ((index == 0) && (flags & FONTAWESOME_FLAG_FIX_MISSING_MISSING)) {
+				draw_empty_glyph(rows, (int)pen.x/FREETYPE_PEN_DPI, 0, (int)slot->advance.x/FREETYPE_PEN_DPI, height);
+			} else {
+				blit_bitmap(rows, &slot->bitmap, slot->bitmap_left, height - slot->bitmap_top);
+			}
 			pen.x += slot->advance.x;
 			pen.y += slot->advance.y;
 		}
