@@ -192,6 +192,7 @@ int main(int argc, char** argv){
 	pen.x = 0;
 	pen.y = 0;
 
+	// Measure glyphs first, to see how big of a canvas we need
 	minx = 0;
 	miny = 0;
 	maxx = 0;
@@ -225,12 +226,14 @@ int main(int argc, char** argv){
 		}
 	}
 
+	// Glyph measurement is done
 	pen.x = (0 - minx) * 64;
 	pen.y = maxy * 64;
 
 	width = (flags & FONTAWESOME_FLAG_EMPTY) ? 1: width;
 	height = (flags & FONTAWESOME_FLAG_EMPTY) ? 1 : height;
 
+	// Create image datastructure
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	info_ptr = png_create_info_struct(png_ptr);
 	png_init_io(png_ptr, stdout);
@@ -253,6 +256,7 @@ int main(int argc, char** argv){
 
 	if (flags & FONTAWESOME_FLAG_EMPTY){
 	}else{
+		// Actual drawing happens here
 		for (i = 0; i < text_length; i++){
 			FT_Set_Transform(face, NULL, &pen);
 			FT_Load_Char(face, text[i], FT_LOAD_RENDER);
