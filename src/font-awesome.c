@@ -6,7 +6,6 @@
 #include <zlib.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <regex.h>
 
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -67,15 +66,22 @@ struct rgba hex_to_rgba(char * hex_string) {
 }
 
 int check_hex_string(char * hex_string) {
-	regex_t regex;
-	int result;
+	if (strlen(hex_string) != 8) return 1;
 
-	regcomp(&regex, "^[A-F0-9]{8}$", REG_EXTENDED);
-	result = regexec(&regex, hex_string, 0, NULL, 0);
+	int i, c;
+	for (i = 0; i < 8; i++) {
+		c = hex_string[i];
 
-	regfree(&regex);
+		if (!(
+			(c >= 48 && c <= 57) // 0-9
+			||
+			(c >= 65 && c <= 70) // A-F
+			||
+			(c >= 97 && c <= 102) // a-f
+		)) return 1;
+	}
 
-	return result;
+	return 0;
 }
 
 void blit_bitmap(png_bytep * rows, FT_Bitmap * bitmap, int x, int y, struct rgba text_color){
