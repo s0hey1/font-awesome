@@ -6,6 +6,7 @@
 #include <zlib.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <regex.h>
 
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -46,7 +47,38 @@ static png_byte * pixel_at (png_bytep * rows, int x, int y){
 	return &row[x * PNG_PIXELSIZE];
 }
 
-void blit_bitmap(png_bytep * rows, FT_Bitmap * bitmap, int x, int y){
+struct rgba {
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+	unsigned char a;
+};
+
+struct rgba hex_to_rgba(char * hex_string) {
+	unsigned long color = strtol(hex_string, NULL, 16);
+	struct rgba rgba_color;
+
+	rgba_color.r = (color >> 24) & 0xFF;
+	rgba_color.g = (color >> 16) & 0xFF;
+	rgba_color.b = (color >> 8) & 0xFF;
+	rgba_color.a = (color) & 0xFF;
+
+	return rgba_color;
+}
+
+int check_hex_string(char * hex_string) {
+	regex_t regex;
+	int result;
+
+	regcomp(&regex, "^[A-F0-9]{8}$", REG_EXTENDED);
+	result = regexec(&regex, hex_string, 0, NULL, 0);
+
+	regfree(&regex);
+
+	return result;
+}
+
+void blit_bitmap(png_bytep * rows, FT_Bitmap * bitmap, int x, int y, struct rgba text_color){
 	int i, j;
 	int w, h;
 	int v;
@@ -58,13 +90,13 @@ void blit_bitmap(png_bytep * rows, FT_Bitmap * bitmap, int x, int y){
 			v = bitmap->buffer[j * w + i];
 			if (v != 0){
 				pixel = pixel_at(rows, x + i, y + j);
-				draw_pixel(pixel, 0, 0, 0, MAX(pixel[3], v));
+				draw_pixel(pixel, text_color.r, text_color.g, text_color.b, MIN(text_color.a, v));
 			}
 		}
 	}
 }
 
-void draw_empty_glyph(png_bytep * rows, int x, int y, int w, int h){
+void draw_empty_glyph(png_bytep * rows, int x, int y, int w, int h, struct rgba text_color){
 	int i;
 	h--;
 	w--;
@@ -79,15 +111,15 @@ void draw_empty_glyph(png_bytep * rows, int x, int y, int w, int h){
 	png_byte * pixel;
 	for (i=0; i < h; i++){
 		pixel = pixel_at(rows, x, y + i);
-		draw_pixel(pixel, 0, 0, 0, 255);
+		draw_pixel(pixel, text_color.r, text_color.g, text_color.b, text_color.a);
 		pixel = pixel_at(rows, x + w, y + i);
-		draw_pixel(pixel, 0, 0, 0, 255);
+		draw_pixel(pixel, text_color.r, text_color.g, text_color.b, text_color.a);
 	}
 	for (i=0; i < w; i++){
 		pixel = pixel_at(rows, x + i, y);
-		draw_pixel(pixel, 0, 0, 0, 255);
+		draw_pixel(pixel, text_color.r, text_color.g, text_color.b, text_color.a);
 		pixel = pixel_at(rows, x + i, y + h);
-		draw_pixel(pixel, 0, 0, 0, 255);
+		draw_pixel(pixel, text_color.r, text_color.g, text_color.b, text_color.a);
 	}
 }
 
@@ -113,6 +145,7 @@ int show_help(){
 	printf("  --version        show version\n"); 
 	printf("  --gracefulempty  output 1x1 empty png when image has 0 area\n"); 
 	printf("  --fix0glyph      draw box if glyph 0 (missing glyph) has no substance\n");
+	printf("  --text-color     text color (in RGBA hex)\n");
 	return 0;
 }
 
@@ -130,6 +163,14 @@ int main(int argc, char** argv){
 	int minx, miny, maxx, maxy;
 	int width, height;
 	int flags = 0;
+	char *argv_text_color = NULL;
+
+	struct rgba text_color;
+	text_color.r = 0x00;
+	text_color.g = 0x00;
+	text_color.b = 0x00;
+	text_color.a = 0xFF;
+
 	FT_UInt	index;
 
 	FT_Library library;
@@ -164,6 +205,9 @@ int main(int argc, char** argv){
 					(strcmp(argv[i], "-h") == 0)){
 				return show_help();
 			}
+			if (strcmp(argv[i], "--text-color") == 0){
+				argv_text_color = argv[++i];
+			}
 			switch (argv[i][1]){
 				case 'f':
 					argv_filename = argv[++i];
@@ -189,6 +233,15 @@ int main(int argc, char** argv){
 		fprintf(stderr, "png_bytep is %zu\n", sizeof(png_bytep));
 		fprintf(stderr, "png_byte is %zu\n", sizeof(png_byte));
 		fprintf(stderr, "stdin codepoints are as follows:\n");
+	}
+
+	if (argv_text_color != NULL) {
+		if (check_hex_string(argv_text_color)) {
+			fprintf(stderr, "Invalid --text-color: %s\n", argv_text_color);
+			return 1;
+		}
+
+		text_color = hex_to_rgba(argv_text_color);
 	}
 
 	while(1){
@@ -309,7 +362,7 @@ int main(int argc, char** argv){
 
 	png_infotext.compression = PNG_TEXT_COMPRESSION_NONE;
 	png_infotext.key = "Title";
-	png_infotext.text = "Love, Creative Market";
+	png_infotext.text = "Creative Market";
 	png_set_text(png_ptr, info_ptr, &png_infotext, 1);
 	png_write_info(png_ptr, info_ptr);
 	png_set_packing(png_ptr);
@@ -320,6 +373,7 @@ int main(int argc, char** argv){
 	}
 
 	if (flags & FONTAWESOME_FLAG_EMPTY){
+		// pass
 	}else{
 		// Actual drawing happens here
 		for (i = 0; i < text_length; i++){
@@ -327,9 +381,9 @@ int main(int argc, char** argv){
 			FT_Set_Transform(face, NULL, &pen);
 			FT_Load_Char(face, text[i], FT_LOAD_RENDER);
 			if ((index == 0) && (flags & FONTAWESOME_FLAG_FIX_MISSING_MISSING)) {
-				draw_empty_glyph(rows, (int)pen.x/FREETYPE_PEN_DPI, 0, (int)slot->advance.x/FREETYPE_PEN_DPI, height);
+				draw_empty_glyph(rows, (int)pen.x/FREETYPE_PEN_DPI, 0, (int)slot->advance.x/FREETYPE_PEN_DPI, height, text_color);
 			} else {
-				blit_bitmap(rows, &slot->bitmap, slot->bitmap_left, height - slot->bitmap_top);
+				blit_bitmap(rows, &slot->bitmap, slot->bitmap_left, height - slot->bitmap_top, text_color);
 			}
 			pen.x += slot->advance.x;
 			pen.y += slot->advance.y;
