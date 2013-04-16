@@ -200,12 +200,15 @@ int main(int argc, char** argv){
 			}
 			if (strcmp(argv[i], "--gracefulempty") == 0){
 				flags |= FONTAWESOME_FLAG_GRACEFULEMPTY;
+				continue;
 			}
 			if (strcmp(argv[i], "--as-codepoints") == 0){
 				flags |= FONTAWESOME_FLAG_AS_CODEPOINTS;
+				continue;
 			}
 			if (strcmp(argv[i], "--fix0glyph") == 0){
 				flags |= FONTAWESOME_FLAG_FIX_MISSING_MISSING;
+				continue;
 			}
 			if ((strcmp(argv[i], "--help") == 0) |
 					(strcmp(argv[i], "-h") == 0)){
@@ -213,6 +216,7 @@ int main(int argc, char** argv){
 			}
 			if (strcmp(argv[i], "--text-color") == 0){
 				argv_text_color = argv[++i];
+				continue;
 			}
 			switch (argv[i][1]){
 				case 'f':
