@@ -19,8 +19,7 @@ class FilePointer {
 			DIRECTION_OUT
 		} Direction;
 
-		FilePointer(Direction dir);
-		FilePointer(const std::string & filename);
+		FilePointer(Direction dir, const std::string & filename = "");
 		~FilePointer();
 
 		FILE * ref();

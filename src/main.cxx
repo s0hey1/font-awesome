@@ -8,6 +8,9 @@
 #include "Font.h"
 #include "FontAwesomeException.h"
 #include "FilePointer.h"
+#include "Image.h"
+#include "PNGWriter.h"
+#include "Renderer.h"
 
 #include <iostream>
 #include <string>
@@ -20,13 +23,16 @@
 int main (int argc, char * argv[]) {
 	int fontSize;
 	std::string filename;
-	bool verbose = false;
-	bool useCodePoints = false;
+	bool verbose 		 	 = false;
+	bool useCodePoints 		 = false;
 	std::string hexColor;
-	bool fixMissingGlyph = false;
+	bool fixMissingGlyph 	 = false;
 	bool gracefulEmptyOutput = false;
-	bool debug = false;
+	bool debug 				 = false;
 	Color textColor;
+	std::wstring text;
+	std::string outfile;
+	bool writeFile 			 = false;
 
 	// setup option parser
 	boost::program_options::options_description optsDesc("Allowed options");
@@ -41,6 +47,7 @@ int main (int argc, char * argv[]) {
 		("fontsize,s", boost::program_options::value<int>(&fontSize)->default_value(32), "font size in points")
 		("codepoints", "text specified as unicode code points")
 		("debug", "only query the required canvas size to render text")
+		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
 	;
 
 	// parse options
@@ -62,6 +69,9 @@ int main (int argc, char * argv[]) {
 		std::cerr << "no file (use -f flag)" << std::endl;
 		return EXIT_FAILURE;
 	}
+	if (argMap.count("outfile")) {
+		writeFile = true;
+	}
 
 	// flags
 	if (argMap.count("verbose")) {
@@ -76,9 +86,13 @@ int main (int argc, char * argv[]) {
 	if (argMap.count("debug")) {
 		debug = true;
 	}
+	if (argMap.count("codepoints")) {
+		useCodePoints = true;
+	}
 
 	setlocale(LC_ALL, "");
 
+	// set text color
 	if (argMap.count("color")) {
 		if (!textColor.validateHex(hexColor)) {
 			std::cerr << "Invalid --color: " << hexColor << std::endl;
@@ -91,9 +105,9 @@ int main (int argc, char * argv[]) {
 	FilePointer input(FilePointer::DIRECTION_IN);
 	input.mode("rb");
 
-	std::wstring text;
+	// get text from stdin
 	if (useCodePoints) {
-		if (verbose) {
+		if (debug) {
 			std::cout << "using codepoints" << std::endl;
 		}
 		std::string characters;
@@ -110,36 +124,25 @@ int main (int argc, char * argv[]) {
 			text.append(wstr);
 		}
 	}
-/*
-	wchar_t character;
-	do {
-		if (useCodePoints) {
-			// Take input as series of long integars
-			if (fscanf(stdin, "%s", buffer) != 1) {
-				break;
-			}
-			character = atoi(buffer);
-		}
-		else{
-			// Take input from stdin as in (locale-aware)
-			character = fgetwc(stdin);
-		}
-		if (character == 10){ // line feed
-			continue;
-		}
-		if (character == WEOF){
-			break;
-		}
-		text.push_back(character);
-		text[text_length] = character;
-		if (verbose) {
-			// fprintf(stderr, "%d: 0x%X (%lc)\n", text_length, (wint_t)c, (wint_t)c);
-		}
-	} while (character != WEOF);
-*/
+	if (debug) {
+		std::wcout << "Rendering text [" << text << "]" << std::endl;
+	}
 
+	// create font
 	try {
 		Font font(filename, fontSize);
+		boost::shared_ptr<Image> image;
+		Renderer renderer(debug);
+
+		image = renderer.render(font, textColor, text);
+		if (writeFile && debug) {
+			std::cout << "Saving image to file [" << outfile << "]" << std::endl;
+		}
+		FilePointer file(FilePointer::DIRECTION_OUT, outfile);
+		PNGWriter writer;
+		if (!writer.write(file, image)) {
+			std::cout << "Error writing image" << std::endl;
+		}
 	}
 	catch (FontAwesomeException const& ex) {
 		std::cerr << "Exception: " << ex.what() << std::endl;
@@ -148,3 +151,4 @@ int main (int argc, char * argv[]) {
 
 	return EXIT_SUCCESS;
 }
+

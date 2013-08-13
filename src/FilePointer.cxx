@@ -7,21 +7,21 @@
 #include "FilePointer.h"
 #include "FontAwesomeException.h"
 
-FilePointer::FilePointer(Direction dir) :
-	closeable_(false) {
-
-	if (dir == DIRECTION_OUT) {
-		fp_ = stdout;
+FilePointer::FilePointer(Direction dir, const std::string & filename) {
+	if (filename.length() == 0) {
+		closeable_ = false;
+		if (dir == DIRECTION_OUT) {
+			fp_ = stdout;
+		}
+		else if (dir == DIRECTION_IN) {
+			fp_ = stdin;
+		}
 	}
-	else if (dir == DIRECTION_IN) {
-		fp_ = stdin;
-	}
-}
-
-FilePointer::FilePointer(const std::string & filename) :
-	closeable_(true) {
-	if ((fp_ = fopen(filename.c_str(), "wb")) == 0) {
-		throw FontAwesomeException("Failed opening file for writing");
+	else {
+		closeable_ = true;
+		if ((fp_ = fopen(filename.c_str(), "wb")) == 0) {
+			throw FontAwesomeException("Failed opening file for writing");
+		}		
 	}
 }
 
