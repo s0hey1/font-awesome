@@ -132,7 +132,7 @@ int main (int argc, char * argv[]) {
 	try {
 		Font font(filename, fontSize);
 		boost::shared_ptr<Image> image;
-		Renderer renderer(debug);
+		Renderer renderer(debug, gracefulEmptyOutput);
 
 		image = renderer.render(font, textColor, text);
 		if (writeFile && debug) {

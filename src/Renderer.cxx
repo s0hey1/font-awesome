@@ -5,9 +5,12 @@
 
 #include "Renderer.h"
 #include "Image.h"
+#include "FontAwesomeException.h"
 
-Renderer::Renderer(bool debug) :
-	debug_(debug) {
+Renderer::Renderer(bool debug, bool gracefulEmpty) :
+	debug_(debug),
+	gracefulEmpty_(gracefulEmpty)
+{
 
 }
 
@@ -18,15 +21,33 @@ Renderer::~Renderer() {
 boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color, const std::wstring & text) {
 	Font::Range range = font.size(text);
 	boost::shared_ptr<Image> image;
-	Font::Vector pen;
+	bool emptyImage = false;
 
 	if (debug_) {
 		std::cout << "Font Size [" << range.size_.first << "x" << range.size_.second << "]" << std::endl;
 	}
 
+	// handle empty images
+	if (range.size_.first == 0 || range.size_.second == 0) {
+		if (!gracefulEmpty_) {
+			throw FontAwesomeException("Empty font data!");
+		}
+		if (debug_) {
+			std::cout << "Empty image, returning 1x1 empty png" << std::endl;
+		}
+		range.size_.first = 1;
+		range.size_.second = 1;
+		emptyImage = true;
+	}
+
 	image.reset(new Image(range.size_.first, range.size_.second, 32));
 
+	if (emptyImage) {
+		return image;
+	}
+
 	size_t penDPI = font.penDPI();
+	Font::Vector pen;
 	pen.first = (0 - range.min_.first) * penDPI;
 	pen.second = range.max_.second * penDPI;
 

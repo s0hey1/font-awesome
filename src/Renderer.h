@@ -16,7 +16,7 @@ class Image;
 
 class Renderer {
 	public:
-		Renderer(bool debug);
+		Renderer(bool debug, bool gracefulEmpty);
 		~Renderer();
 
 		boost::shared_ptr<Image> render(const Font & font, const Color & color, const std::wstring & text);
@@ -24,4 +24,5 @@ class Renderer {
 
 	private:
 		bool debug_;
+		bool gracefulEmpty_;
 };
