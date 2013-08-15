@@ -91,6 +91,7 @@ AS_IF([test "x$enable_gcov" = "xyes" && test "x$GCC" = "xyes"],
 )
 
 AM_CONDITIONAL([GCOV_ENABLED], [test "x$enable_gcov" = "xyes"])
+AM_CONDITIONAL([TESTS_ENABLED], [test "x$ax_enable_debug" = "xyes"])
 AC_SUBST([GCOV_CFLAGS])
 AC_SUBST([GCOV_LDFLAGS])
 AC_MSG_RESULT([$enable_gcov])
@@ -101,7 +102,7 @@ version.h
 src/Makefile
 ])
 
-if test "x$ax_enable_debug" == "xyes"; then
+if test "x$ax_enable_debug" = "xyes"; then
   AC_CONFIG_FILES([tests/Makefile])
 fi
 

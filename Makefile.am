@@ -1,9 +1,13 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
+if TESTS_ENABLED
+	TESTS_SUBDIR = tests
+endif
+
 SUBDIRS = \
 src \
-tests
+$(TESTS_SUBDIR)
 
 gcov_sources = $(unit_tests_SOURCES)
 
