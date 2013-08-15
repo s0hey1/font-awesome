@@ -7,6 +7,8 @@
 #include "Image.h"
 #include "FontAwesomeException.h"
 
+#include <iostream>
+
 Renderer::Renderer(bool debug, bool gracefulEmpty, bool missing) :
 	debug_(debug),
 	gracefulEmpty_(gracefulEmpty),
