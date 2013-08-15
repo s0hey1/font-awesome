@@ -19,14 +19,19 @@ Font::Font(const std::string & filename, int size) :
 
 	// load font file
 	if ((error = FT_New_Face(library_, filename.c_str(), 0, &face_)) != 0) {
-		throw FontAwesomeException("Error creating new freetype face!");
 		FT_Done_FreeType(library_);
+		if (error == FT_Err_Unknown_File_Format) {
+			throw FontAwesomeException("Unsupported font file format!");
+		}
+		else {
+			throw FontAwesomeException("Error creating new freetype face!");
+		}
 	}
 
 	// set char size
 	if ((error = FT_Set_Char_Size(face_, size * penDPI_, 0, dpi_, 0)) != 0) {
-		throw FontAwesomeException("Error setting freetype char size!");
 		release();
+		throw FontAwesomeException("Error setting freetype char size!");
 	}
 }
 
@@ -108,13 +113,26 @@ Font::Glyph Font::glyph(wchar_t character, Font::Vector pen) const {
 
 	slot = face_->glyph;
 
-	glyph.advance_.first = slot->advance.x;
-	glyph.advance_.second = slot->advance.y;
-	glyph.bitmap_ = slot->bitmap.buffer;
-	glyph.position_.first = slot->bitmap_left;
-	glyph.position_.second = slot->bitmap_top;
-	glyph.size_.first = slot->bitmap.width;
-	glyph.size_.second = slot->bitmap.rows;
+	glyph.advance_.first 	= slot->advance.x;
+	glyph.advance_.second 	= slot->advance.y;
+	glyph.bitmap_ 			= slot->bitmap.buffer;
+	glyph.position_.first 	= slot->bitmap_left;
+	glyph.position_.second 	= slot->bitmap_top;
+	glyph.size_.first 		= slot->bitmap.width;
+	glyph.size_.second 		= slot->bitmap.rows;
 
 	return glyph;
 }
+
+
+bool Font::missingExists() const {
+	size_t top;
+	FT_Load_Glyph(face_, 0, FT_LOAD_RENDER);
+	// bitmap coords are in cartesian space & not image space
+	top = 0 + face_->glyph->bitmap_top;
+	if (top == 0) {
+		return false;
+	}
+	return true;
+}
+

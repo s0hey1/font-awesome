@@ -48,6 +48,11 @@ class Font {
 		size_t penDPI() const;
 		size_t dpi() const;
 
+		/**
+		 * Check glyph 0 to see if it exists or not
+		 */ 
+		bool missingExists() const;
+
 	protected:
 		void release();
 

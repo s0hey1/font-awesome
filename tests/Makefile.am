@@ -5,7 +5,9 @@ bin_PROGRAMS = unit_tests
 unit_tests_SOURCES = \
 TestMain.cxx \
 ../src/Color.cxx \
-ColorTest.cxx
+../src/Image.cxx \
+ColorTest.cxx \
+ImageTest.cxx
 
 AM_CPPFLAGS = $(DEPS_CFLAGS) $(BOOST_CPPFLAGS) $(GCOV_CFLAGS)
 AM_LDFLAGS = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS) $(GCOV_LDFLAGS)

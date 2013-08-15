@@ -7,9 +7,10 @@
 #include "Image.h"
 #include "FontAwesomeException.h"
 
-Renderer::Renderer(bool debug, bool gracefulEmpty) :
+Renderer::Renderer(bool debug, bool gracefulEmpty, bool missing) :
 	debug_(debug),
-	gracefulEmpty_(gracefulEmpty)
+	gracefulEmpty_(gracefulEmpty),
+	missing_(missing)
 {
 
 }
@@ -59,10 +60,11 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 		Font::Glyph glyph = font.glyph(text[index], pen);
 
 		// if glyph is empty & fix missing is enabled then draw empty glyph
-		if (glyph.empty_) {
+		if (glyph.empty_ && missing_) {
 			if (debug_) {
 				std::cout << "empty glyph [" << text[index] << "] at index [" << index << "]" << std::endl;
 			}
+			drawRect(image, pen.first / font.penDPI(), 0, glyph.advance_.first / font.penDPI(), image->height(), color);
 		}
 		else {
 			blit(image, glyph, color);
@@ -72,6 +74,44 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 		pen.second += glyph.advance_.second;
 	}
 	return image;
+}
+
+void Renderer::drawPoint(const boost::shared_ptr<Image> & image, size_t pixel, const Color & color) {
+		(*image)[pixel] 	 = color.red();
+		(*image)[pixel + 1]  = color.green();
+		(*image)[pixel + 2]  = color.blue();
+		(*image)[pixel + 3]  = color.alpha();
+}
+
+void Renderer::drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t y, size_t width, size_t height, const Color & color) {
+	size_t index;
+	size_t pixel;
+	size_t canvasWidth 	= image->width();
+	const size_t bpp 	= 4;
+	width--;
+	height--;
+	if (height > 4) {
+		y += 2;
+		height -= 4;
+	}
+	if (width > 4) {
+		x += 2;
+		width -= 4;
+	}
+	for (index = 0; index < height; index++) {
+		pixel = ((y + index) * canvasWidth * bpp) + (x * bpp);
+		drawPoint(image, pixel, color);
+
+		pixel = ((y + index) * canvasWidth * bpp) + ((x + width) * bpp);
+		drawPoint(image, pixel, color);
+	}
+	for (index = 0; index < width; index++) {
+		pixel = (y * canvasWidth * bpp) + ((x + index) * bpp);
+		drawPoint(image, pixel, color);
+
+		pixel = ((y + height) * canvasWidth * bpp) + ((x + index) * bpp);
+		drawPoint(image, pixel, color);
+	}
 }
 
 void Renderer::blit(const boost::shared_ptr<Image> & image, const Font::Glyph & glyph, const Color & color) {
@@ -92,10 +132,7 @@ void Renderer::blit(const boost::shared_ptr<Image> & image, const Font::Glyph & 
 			if (glyph.bitmap_[j * width + i] != 0) {
 				flipY = height - j - 1 - y; // freetype rows are backwards so flip them around
 				pixel = ((flipY + y) * canvasWidth * bpp) + ((x + i) * bpp);
-				(*image)[pixel] 	 = color.red();
-				(*image)[pixel + 1]  = color.green();
-				(*image)[pixel + 2]  = color.blue();
-				(*image)[pixel + 3]  = color.alpha();
+				drawPoint(image, pixel, color);
 			}
 		}
 	}

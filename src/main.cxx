@@ -131,8 +131,23 @@ int main (int argc, char * argv[]) {
 	// create font
 	try {
 		Font font(filename, fontSize);
+
+		if (fixMissingGlyph) {
+			if (font.missingExists()) {
+				if (verbose) {
+					std::cerr << "Missing glyph exists. Unsetting flag." << std::endl;
+				}
+				fixMissingGlyph = false;
+			}
+			else {
+				if (verbose) {
+					std::cerr << "Missing glyph has no substance. Will hack in box." << std::endl;
+				}
+			}
+		}
+
 		boost::shared_ptr<Image> image;
-		Renderer renderer(debug, gracefulEmptyOutput);
+		Renderer renderer(debug, gracefulEmptyOutput, fixMissingGlyph);
 
 		image = renderer.render(font, textColor, text);
 		if (writeFile && debug) {
