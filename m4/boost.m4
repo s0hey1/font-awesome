@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 m4_define([_BOOST_SERIAL], [m4_translit([
-# serial 15
+# serial 17
 ], [#
 ], [])])
 
@@ -79,7 +79,32 @@ dnl Cannot use 'dnl' after [$4] because a trailing dnl may break AC_CACHE_CHECK
 rm -rf conftest*
 ])# AC_EGREP_CPP
 
+# _BOOST_LANG_PUSH_CXX
+# --------------------------------------------------------
+# Same as AC_LANG_PUSH for C++ but modifies ac_compile and ac_link to always
+# employ ./libtool from LT_OUTPUT.  This reduces our exposure to compiler and
+# linker differences.  Attempts to ensure others playing similar libtool tricks
+# with ac_compile and ac_link do not break us.
+AC_DEFUN([_BOOST_LANG_PUSH_CXX],[
+AC_REQUIRE([LT_OUTPUT])dnl
+AC_LANG_PUSH([C++])dnl
+case "$ac_compile" in                                                       #(
+  ./libtool*) :                                                           ;;#(
+  *)          ac_compile="./libtool --mode=compile --tag=CXX $ac_compile" ;;
+esac
+case "$ac_link" in                                                          #(
+  ./libtool*) :                                                           ;;#(
+  *)          ac_link="./libtool --mode=link --tag=CXX $ac_link"          ;;
+esac
+]) # _BOOST_LANG_PUSH_CXX
 
+# _BOOST_LANG_POP_CXX
+# --------------------------------------------------------
+# Same as AC_LANG_POP for C++.
+# For symmetry with _BOOST_LANG_PUSH_CXX
+AC_DEFUN([_BOOST_LANG_POP_CXX],[
+AC_LANG_POP([C++])dnl
+]) # _BOOST_LANG_POP_CXX
 
 # BOOST_REQUIRE([VERSION], [ACTION-IF-NOT-FOUND])
 # -----------------------------------------------
@@ -123,7 +148,7 @@ boost_save_CPPFLAGS=$CPPFLAGS
   AC_CACHE_CHECK([for Boost headers version >= $boost_version_req_string],
     [boost_cv_inc_path],
     [boost_cv_inc_path=no
-AC_LANG_PUSH([C++])dnl
+_BOOST_LANG_PUSH_CXX()dnl
 m4_pattern_allow([^BOOST_VERSION$])dnl
     AC_LANG_CONFTEST([AC_LANG_PROGRAM([[#include <boost/version.hpp>
 #if !defined BOOST_VERSION
@@ -184,7 +209,7 @@ m4_pattern_allow([^BOOST_VERSION$])dnl
       fi
     done
     done
-AC_LANG_POP([C++])dnl
+_BOOST_LANG_POP_CXX()dnl
     ])
     case $boost_cv_inc_path in #(
       no)
@@ -251,7 +276,7 @@ AC_DEFUN([BOOST_FIND_HEADER],
 if test x"$boost_cv_inc_path" = xno; then
   m4_default([$2], [AC_MSG_NOTICE([Boost not available, not searching for $1])])
 else
-AC_LANG_PUSH([C++])dnl
+_BOOST_LANG_PUSH_CXX()dnl
 boost_save_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER([$1],
@@ -259,7 +284,7 @@ AC_CHECK_HEADER([$1],
                                [Define to 1 if you have <$1>])])],
   [m4_default([$2], [AC_MSG_ERROR([cannot find $1])])])
 CPPFLAGS=$boost_save_CPPFLAGS
-AC_LANG_POP([C++])dnl
+_BOOST_LANG_POP_CXX()dnl
 fi
 ])# BOOST_FIND_HEADER
 
@@ -294,7 +319,7 @@ if test x"$boost_cv_inc_path" = xno; then
   AC_MSG_NOTICE([Boost not available, not searching for the Boost $1 library])
 else
 dnl The else branch is huge and wasn't intended on purpose.
-AC_LANG_PUSH([C++])dnl
+_BOOST_LANG_PUSH_CXX()dnl
 AS_VAR_PUSHDEF([Boost_lib], [boost_cv_lib_$1])dnl
 AS_VAR_PUSHDEF([Boost_lib_LDFLAGS], [boost_cv_lib_$1_LDFLAGS])dnl
 AS_VAR_PUSHDEF([Boost_lib_LDPATH], [boost_cv_lib_$1_LDPATH])dnl
@@ -403,6 +428,18 @@ dnl generated only once above (before we start the for loops).
       LDFLAGS=$boost_save_LDFLAGS
       LIBS=$boost_save_LIBS
       if test x"$Boost_lib" = xyes; then
+dnl     Next line must be -R and not -Wl,-R otherwise we break libtool's
+dnl     dependency_libs RPATH propagation!  Using -Wl,-R causes binaries which
+dnl     depend on convenience or shared libraries to not have RPATH set
+dnl     correctly on installation.  If your compiler balks on -R, add
+dnl         LT_OUTPUT
+dnl         m4_append([AC_LANG(C++)],[
+dnl             ac_compile="./libtool --mode=compile --tag=CXX $ac_compile"
+dnl             ac_link="./libtool --mode=link --tag=CXX $ac_link"
+dnl         ])[]dnl
+dnl     to your configure.ac after LT_INIT.  These lines force autoconf to only
+dnl     use libtool for compile and link tests for C++. Libtool will then
+dnl     intelligently shield you from the -R option when it is not appropriate.
         Boost_lib_LDFLAGS="-L$boost_ldpath -R$boost_ldpath"
         Boost_lib_LDPATH="$boost_ldpath"
         break 6
@@ -431,7 +468,7 @@ AS_VAR_POPDEF([Boost_lib])dnl
 AS_VAR_POPDEF([Boost_lib_LDFLAGS])dnl
 AS_VAR_POPDEF([Boost_lib_LDPATH])dnl
 AS_VAR_POPDEF([Boost_lib_LIBS])dnl
-AC_LANG_POP([C++])dnl
+_BOOST_LANG_POP_CXX()dnl
 fi
 ])# BOOST_FIND_LIB
 
@@ -581,11 +618,41 @@ BOOST_DEFUN([Hash],
 [BOOST_FIND_HEADER([boost/functional/hash.hpp])])
 
 
+# BOOST_INTRUSIVE()
+# ------------
+# Look for Boost.Intrusive any_hook
+BOOST_DEFUN([Intrusive],
+[BOOST_FIND_HEADER([boost/intrusive/any_hook.hpp])])
+
+
 # BOOST_LAMBDA()
 # --------------
 # Look for Boost.Lambda
 BOOST_DEFUN([Lambda],
 [BOOST_FIND_HEADER([boost/lambda/lambda.hpp])])
+
+
+# BOOST_LOG([PREFERRED-RT-OPT])
+# -----------------------------
+# Look for Boost.Log For the documentation of PREFERRED-RT-OPT, see the
+# documentation of BOOST_FIND_LIB above.
+BOOST_DEFUN([Log],
+[BOOST_FIND_LIB([log], [$1],
+    [boost/log/core/core.hpp],
+    [boost::log::attribute a; a.get_value();])
+])# BOOST_LOG
+
+
+# BOOST_LOG_SETUP([PREFERRED-RT-OPT])
+# -----------------------------------
+# Look for Boost.Log For the documentation of PREFERRED-RT-OPT, see the
+# documentation of BOOST_FIND_LIB above.
+BOOST_DEFUN([Log_Setup],
+[AC_REQUIRE([BOOST_LOG])dnl
+BOOST_FIND_LIB([log_setup], [$1],
+    [boost/log/utility/init/from_settings.hpp],
+    [boost::log::basic_settings<char> bs; bs.empty();])
+])# BOOST_LOG_SETUP
 
 
 # BOOST_MATH()
@@ -622,11 +689,32 @@ BOOST_DEFUN([Optional],
 [BOOST_FIND_HEADER([boost/optional.hpp])])
 
 
+# BOOST_POINTER_CONTAINER()
+# --------------------------
+# Look for Boost.Pointer Container
+BOOST_DEFUN([Pointer_Container],
+[BOOST_FIND_HEADER([boost/ptr_container/ptr_list.hpp])])
+
+
 # BOOST_PREPROCESSOR()
 # --------------------
 # Look for Boost.Preprocessor
 BOOST_DEFUN([Preprocessor],
 [BOOST_FIND_HEADER([boost/preprocessor/repeat.hpp])])
+
+
+# BOOST_UNORDERED()
+# -----------------
+# Look for Boost.Unordered
+BOOST_DEFUN([Unordered],
+[BOOST_FIND_HEADER([boost/unordered_map.hpp])])
+
+
+# BOOST_UUID()
+# ------------
+# Look for Boost.Uuid
+BOOST_DEFUN([Uuid],
+[BOOST_FIND_HEADER([boost/uuid/uuid.hpp])])
 
 
 # BOOST_PROGRAM_OPTIONS([PREFERRED-RT-OPT])
@@ -639,14 +727,6 @@ BOOST_DEFUN([Program_Options],
                 [boost::program_options::options_description d("test");])
 ])# BOOST_PROGRAM_OPTIONS
 
-
-# BOOST_PROPERTY_TREE([PREFERRED-RT-OPT])
-# -----------------------------------------
-# Look for Boost.Program_options.  For the documentation of PREFERRED-RT-OPT,
-# see the documentation of BOOST_FIND_LIB above.
-BOOST_DEFUN([Property_Tree],
-[BOOST_FIND_HEADER([boost/property_tree/ptree.hpp])])
-])# BOOST_PROPERTY_TREE
 
 
 # _BOOST_PYTHON_CONFIG(VARIABLE, FLAG)
@@ -886,7 +966,7 @@ BOOST_DEFUN([Xpressive],
 AC_DEFUN([_BOOST_PTHREAD_FLAG],
 [AC_REQUIRE([AC_PROG_CXX])dnl
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
-AC_LANG_PUSH([C++])dnl
+_BOOST_LANG_PUSH_CXX()dnl
 AC_CACHE_CHECK([for the flags needed to use pthreads], [boost_cv_pthread_flag],
 [ boost_cv_pthread_flag=
   # The ordering *is* (sometimes) important.  Some notes on the
@@ -940,7 +1020,7 @@ dnl Re-use the test file already generated.
     $boost_pthread_ok && break
   done
 ])
-AC_LANG_POP([C++])dnl
+_BOOST_LANG_POP_CXX()dnl
 ])# _BOOST_PTHREAD_FLAG
 
 
@@ -962,7 +1042,7 @@ AC_REQUIRE([AC_CANONICAL_HOST])dnl
 AC_CACHE_CHECK([for the toolset name used by Boost for $CXX], [boost_cv_lib_tag],
 [boost_cv_lib_tag=unknown
 if test x$boost_cv_inc_path != xno; then
-  AC_LANG_PUSH([C++])dnl
+  _BOOST_LANG_PUSH_CXX()dnl
   # The following tests are mostly inspired by boost/config/auto_link.hpp
   # The list is sorted to most recent/common to oldest compiler (in order
   # to increase the likelihood of finding the right compiler with the
@@ -977,6 +1057,7 @@ if test x$boost_cv_inc_path != xno; then
   # I'm not sure about my test for `il' (be careful: Intel's ICC pre-defines
   # the same defines as GCC's).
   for i in \
+    _BOOST_gcc_test(4, 6) \
     _BOOST_gcc_test(4, 5) \
     _BOOST_gcc_test(4, 4) \
     _BOOST_gcc_test(4, 3) \
@@ -1014,7 +1095,7 @@ if test x$boost_cv_inc_path != xno; then
 #endif
 ]])], [boost_cv_lib_tag=$boost_tag; break], [])
   done
-AC_LANG_POP([C++])dnl
+_BOOST_LANG_POP_CXX()dnl
   case $boost_cv_lib_tag in #(
     # Some newer (>= 1.35?) versions of Boost seem to only use "gcc" as opposed
     # to "gcc41" for instance.
