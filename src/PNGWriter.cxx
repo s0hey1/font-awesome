@@ -5,6 +5,7 @@
 
 #include "PNGWriter.h"
 
+#include <iostream>
 #include <png.h>
 
 

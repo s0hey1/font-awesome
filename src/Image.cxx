@@ -13,9 +13,9 @@
 
 Image::Image() : 
 	data_(0), 
+	bpp_(24), 
 	width_(0), 
 	height_(0), 
-	bpp_(24), 
 	format_(FORMAT_RGB) {
 }
 
