@@ -1,17 +1,37 @@
 AC_INIT([font-awesome], [1.4.0], [josh@creativemarket.com], [font-awesome], [https://www.creativemarket.com])
 AC_PREREQ([2.59])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
+
+AX_CHECK_ENABLE_DEBUG([no])
 AC_PROG_CXX
 AC_PROG_LIBTOOL
+AX_COMPILER_VENDOR
 LT_INIT([disable-static])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS([string])
 AC_CHECK_HEADERS([iostream])
 
+if test "x$ax_enable_debug" != "xyes"; then
+  AX_APPEND_COMPILE_FLAGS([-O3])
+fi
+
+AC_LANG_PUSH([C++])
+AX_CXX_CPPFLAGS_STD_LANG(AM_CPPFLAGS)
+AX_CXX_CXXFLAGS_STD_LANG(AM_CXXFLAGS)
+AX_CXX_LDFLAGS_STD_LANG(AM_LDFLAGS)
+AX_CXXFLAGS_WARN_ALL
+AC_LANG_POP([C++])
+AX_WARNINGS_SANITIZE
+AC_CACHE_SAVE
+
 BOOST_REQUIRE([1.40])
-BOOST_TEST
 BOOST_PROGRAM_OPTIONS
+
+if test "x$ax_enable_debug" == "xyes"; then
+  BOOST_TEST
+fi
 
 # use pkg-config
 PKG_PROG_PKG_CONFIG([0.2])
@@ -65,7 +85,7 @@ AC_ARG_ENABLE([gcov],
 
 AS_IF([test "x$enable_gcov" = "xyes" && test "x$GCC" = "xyes"],
       [
-        GCOV_CFLAGS="-g -O0 -fprofile-arcs -ftest-coverage"
+        GCOV_CFLAGS="-fprofile-arcs -ftest-coverage"
         GCOV_LDFLAGS="-lgcov"
       ]
 )
@@ -79,7 +99,11 @@ AC_CONFIG_FILES([
 Makefile
 version.h
 src/Makefile
-tests/Makefile
 ])
+
+if test "x$ax_enable_debug" == "xyes"; then
+  AC_CONFIG_FILES([tests/Makefile])
+fi
+
 
 AC_OUTPUT
