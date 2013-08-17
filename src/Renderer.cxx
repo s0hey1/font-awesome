@@ -136,7 +136,7 @@ void Renderer::blit(const boost::shared_ptr<Image> & image, const Font::Glyph & 
 		for (size_t j = 0; j < height; j++) {
 			value = glyph.bitmap_[j * width + i];
 			if (value != 0) {
-				flipY = height - j - 1 - y; // freetype rows are backwards so flip them around
+				flipY = canvasHeight - j - 1 - y; // freetype rows are backwards so flip them around
 				pixel = ((flipY) * canvasWidth * bpp) + ((x + i) * bpp);
 				alpha = std::min(colorAlpha, value);
 				drawPoint(image, pixel, color, alpha);
