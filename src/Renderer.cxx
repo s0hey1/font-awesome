@@ -78,11 +78,11 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 	return image;
 }
 
-void Renderer::drawPoint(const boost::shared_ptr<Image> & image, size_t pixel, const Color & color) {
+void Renderer::drawPoint(const boost::shared_ptr<Image> & image, size_t pixel, const Color & color, unsigned char alpha) {
 		(*image)[pixel] 	 = color.red();
 		(*image)[pixel + 1]  = color.green();
 		(*image)[pixel + 2]  = color.blue();
-		(*image)[pixel + 3]  = color.alpha();
+		(*image)[pixel + 3]  = alpha;
 }
 
 void Renderer::drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t y, size_t width, size_t height, const Color & color) {
@@ -102,17 +102,17 @@ void Renderer::drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t
 	}
 	for (index = 0; index < height; index++) {
 		pixel = ((y + index) * canvasWidth * bpp) + (x * bpp);
-		drawPoint(image, pixel, color);
+		drawPoint(image, pixel, color, color.alpha());
 
 		pixel = ((y + index) * canvasWidth * bpp) + ((x + width) * bpp);
-		drawPoint(image, pixel, color);
+		drawPoint(image, pixel, color, color.alpha());
 	}
 	for (index = 0; index < width; index++) {
 		pixel = (y * canvasWidth * bpp) + ((x + index) * bpp);
-		drawPoint(image, pixel, color);
+		drawPoint(image, pixel, color, color.alpha());
 
 		pixel = ((y + height) * canvasWidth * bpp) + ((x + index) * bpp);
-		drawPoint(image, pixel, color);
+		drawPoint(image, pixel, color, color.alpha());
 	}
 }
 
@@ -126,15 +126,20 @@ void Renderer::blit(const boost::shared_ptr<Image> & image, const Font::Glyph & 
 	const size_t bpp 	= 4;
 	size_t pixel;
 	size_t flipY;
+	unsigned char value;
+	unsigned char alpha;
+	unsigned char colorAlpha = color.alpha();
 	if (debug_) {
 		std::cout << "glyph size [" << width << "x" << height << "] @ [" << x << "x" << y << "]" << std::endl;
 	}
 	for (size_t i = 0; i < width; i++) {
 		for (size_t j = 0; j < height; j++) {
-			if (glyph.bitmap_[j * width + i] != 0) {
+			value = glyph.bitmap_[j * width + i];
+			if (value != 0) {
 				flipY = height - j - 1 - y; // freetype rows are backwards so flip them around
 				pixel = ((flipY + y) * canvasWidth * bpp) + ((x + i) * bpp);
-				drawPoint(image, pixel, color);
+				alpha = std::min(colorAlpha, value);
+				drawPoint(image, pixel, color, alpha);
 			}
 		}
 	}
