@@ -111,7 +111,7 @@ void Renderer::drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t
 		pixel = (y * canvasWidth * bpp) + ((x + index) * bpp);
 		drawPoint(image, pixel, color, color.alpha());
 
-		pixel = ((y + height + 1) * canvasWidth * bpp) + ((x + index) * bpp);
+		pixel = ((y + height) * canvasWidth * bpp) + ((x + index) * bpp);
 		drawPoint(image, pixel, color, color.alpha());
 	}
 }
