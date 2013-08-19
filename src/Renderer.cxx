@@ -21,7 +21,7 @@ Renderer::~Renderer() {
 
 }
 
-boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color, const std::wstring & text) {
+boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor) {
 	Font::Range range = font.size(text);
 	boost::shared_ptr<Image> image;
 	bool emptyImage = false;
@@ -66,7 +66,7 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 			if (debug_) {
 				std::cout << "empty glyph [" << text[index] << "] at index [" << index << "]" << std::endl;
 			}
-			drawRect(image, pen.first / font.penDPI(), 0, glyph.advance_.first / font.penDPI(), image->height(), color);
+			drawRect(image, pen.first / font.penDPI(), 0, glyph.advance_.first / font.penDPI(), image->height(), emptyColor);
 		}
 		else {
 			blit(image, glyph, color);
@@ -107,11 +107,11 @@ void Renderer::drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t
 		pixel = ((y + index) * canvasWidth * bpp) + ((x + width) * bpp);
 		drawPoint(image, pixel, color, color.alpha());
 	}
-	for (index = 0; index < width; index++) {
+	for (index = 0; index <= width; index++) {
 		pixel = (y * canvasWidth * bpp) + ((x + index) * bpp);
 		drawPoint(image, pixel, color, color.alpha());
 
-		pixel = ((y + height) * canvasWidth * bpp) + ((x + index) * bpp);
+		pixel = ((y + height + 1) * canvasWidth * bpp) + ((x + index) * bpp);
 		drawPoint(image, pixel, color, color.alpha());
 	}
 }

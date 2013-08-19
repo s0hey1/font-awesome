@@ -26,10 +26,12 @@ int main (int argc, char * argv[]) {
 	bool verbose 		 	 = false;
 	bool useCodePoints 		 = false;
 	std::string hexColor;
+	std::string hexEmptyColor;
 	bool fixMissingGlyph 	 = false;
 	bool gracefulEmptyOutput = false;
 	bool debug 				 = false;
 	Color textColor;
+	Color emptyColor;
 	std::wstring text;
 	std::string outfile;
 	bool writeFile 			 = false;
@@ -43,6 +45,7 @@ int main (int argc, char * argv[]) {
 		("gracefulempty", "output 1x1 empty png when image has 0 area")
 		("fix0glyph", "draw box if glyph 0 (missing glyph) has no substance")
 		("color", boost::program_options::value<std::string>(&hexColor), "text color (in RGBA hex)")
+		("emptycolor", boost::program_options::value<std::string>(&hexEmptyColor), "empty glyph color (in RGBA hex)")
 		("filename,f", boost::program_options::value<std::string>(&filename), "font filename")
 		("fontsize,s", boost::program_options::value<int>(&fontSize)->default_value(32), "font size in points")
 		("codepoints", "text specified as unicode code points")
@@ -100,6 +103,13 @@ int main (int argc, char * argv[]) {
 		}
 		textColor.fromHex(hexColor);
 	}
+	if (argMap.count("emptycolor")) {
+		if (!emptyColor.validateHex(hexEmptyColor)) {
+			std::cerr << "Invalid --emptycolor: " << hexEmptyColor << std::endl;
+			return EXIT_FAILURE;
+		}
+		emptyColor.fromHex(hexEmptyColor);
+	}
 
 	// make sure stdin is in binary read mode
 	FilePointer input(FilePointer::DIRECTION_IN);
@@ -149,7 +159,7 @@ int main (int argc, char * argv[]) {
 		boost::shared_ptr<Image> image;
 		Renderer renderer(debug, gracefulEmptyOutput, fixMissingGlyph);
 
-		image = renderer.render(font, textColor, text);
+		image = renderer.render(font, textColor, text, emptyColor);
 		if (writeFile && debug) {
 			std::cout << "Saving image to file [" << outfile << "]" << std::endl;
 		}
