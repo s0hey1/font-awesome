@@ -69,7 +69,12 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 			drawRect(image, pen.first / font.penDPI(), 0, glyph.advance_.first / font.penDPI(), image->height(), emptyColor);
 		}
 		else {
-			blit(image, glyph, color);
+			if (glyph.empty_) {
+				blit(image, glyph, emptyColor);
+			}
+			else {
+				blit(image, glyph, color);
+			}
 		}
 
 		pen.first += glyph.advance_.first;
