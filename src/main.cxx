@@ -35,6 +35,7 @@ int main (int argc, char * argv[]) {
 	std::wstring text;
 	std::string outfile;
 	bool writeFile 			 = false;
+	bool showMetrics		 = false;
 
 	// setup option parser
 	boost::program_options::options_description optsDesc("Allowed options");
@@ -50,6 +51,7 @@ int main (int argc, char * argv[]) {
 		("fontsize,s", boost::program_options::value<int>(&fontSize)->default_value(32), "font size in points")
 		("codepoints", "text specified as unicode code points")
 		("debug", "only query the required canvas size to render text")
+		("metrics", "output font metrics instead of a rendered image")
 		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
 	;
 
@@ -66,6 +68,10 @@ int main (int argc, char * argv[]) {
 	if (argMap.count("version")) {
 		std::cout << "font-awesome version " << FONTAWESOME_VERSION << std::endl;
 		return EXIT_SUCCESS;
+	}
+
+	if (argMap.count("metrics")) {
+		showMetrics = true;
 	}
 
 	if (!argMap.count("filename")) {
@@ -154,6 +160,23 @@ int main (int argc, char * argv[]) {
 					std::cerr << "Missing glyph has no substance. Will hack in box." << std::endl;
 				}
 			}
+		}
+
+		if (showMetrics) {
+			Font::TextInfo info = font.metrics(text);
+			std::cout << "Text Length: " << info.length_ << std::endl;
+			std::cout << "Missing Empty Glyph: ";
+			if (info.missingEmpty_) {
+				std::cout << "Yes";
+			}
+			else {
+				std::cout << "No";
+			}
+			std::cout << std::endl;
+			std::cout << "Renderable Glyphs: " << info.hitCount_ << std::endl;
+			std::cout << "Non-renderable Glyphs: " << info.emptyCount_ << std::endl;
+
+			return EXIT_SUCCESS;
 		}
 
 		boost::shared_ptr<Image> image;

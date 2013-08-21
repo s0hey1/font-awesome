@@ -32,6 +32,15 @@ class Font {
 			Vector max_;
 		} Range;
 
+		typedef struct {
+			size_t length_;
+			size_t emptyCount_;
+			size_t missingEmpty_;
+			size_t hitCount_;
+			Range size_;
+			std::wstring charmap_;
+		} TextInfo;
+
 		Font(const std::string & filename, int size);
 		~Font();
 
@@ -39,6 +48,11 @@ class Font {
 		 * Get the space required to render a string of text
 		 */
 		Range size(const std::wstring & text) const;
+
+		/**
+		 * Get information about what a font can do with a string of text
+		 */
+		TextInfo metrics(const std::wstring & text) const;
 
 		/**
 		 * Get the rendered glyph for a single character

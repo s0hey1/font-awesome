@@ -92,6 +92,32 @@ Font::Range Font::size(const std::wstring & text) const {
 	return range;
 }
 
+Font::TextInfo Font::metrics(const std::wstring & text) const {
+	TextInfo info;
+
+	info.length_ 		= text.length();
+	info.missingEmpty_ 	= !missingExists();
+	info.size_ 			= size(text);
+	info.emptyCount_ 	= 0;
+	info.hitCount_ 		= 0;
+
+	Vector pen(0, 0);
+	for (size_t index = 0; index < info.length_; ++index) {
+		Glyph charGlyph = glyph(text[index], pen);
+
+		if (charGlyph.empty_) {
+			info.emptyCount_++;
+		}
+		else {
+			info.hitCount_++;
+		}
+	}
+
+	// [TODO] - populate info.charmap_
+
+	return info;
+}
+
 Font::Glyph Font::glyph(wchar_t character, Font::Vector pen) const {
 	size_t index = FT_Get_Char_Index(face_, character);
 	FT_Vector ftPen;
