@@ -113,7 +113,13 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 		}
 	}
 
-	// [TODO] - populate info.charmap_
+	FT_ULong charcode;
+	FT_UInt glyphIndex;
+	charcode = FT_Get_First_Char(face_, &glyphIndex);
+	while (glyphIndex != 0) {
+		info.charmap_.push_back(charcode);
+		charcode = FT_Get_Next_Char(face_, charcode, &glyphIndex);
+	}
 
 	return info;
 }

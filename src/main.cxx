@@ -175,7 +175,8 @@ int main (int argc, char * argv[]) {
 			std::cout << std::endl;
 			std::cout << "Renderable Glyphs: " << info.hitCount_ << std::endl;
 			std::cout << "Non-renderable Glyphs: " << info.emptyCount_ << std::endl;
-
+			std::cout << "Character Map:";
+			std::wcout << info.charmap_ << std::endl;
 			return EXIT_SUCCESS;
 		}
 
