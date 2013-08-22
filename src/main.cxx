@@ -242,6 +242,7 @@ int main (int argc, char * argv[]) {
 				std::cout << "No";
 			}
 			std::cout << std::endl;
+			return EXIT_SUCCESS;
 		}
 
 		boost::shared_ptr<Image> image;
