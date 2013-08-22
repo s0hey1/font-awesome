@@ -121,6 +121,25 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 		charcode = FT_Get_Next_Char(face_, charcode, &glyphIndex);
 	}
 
+	// populate info about the face itself
+	info.faceInfo_.name_ = FT_Get_Postscript_Name(face_);
+	info.faceInfo_.glyphCount_ = face_->num_glyphs;
+	info.faceInfo_.family_ = face_->family_name;
+	info.faceInfo_.style_ = face_->style_name;
+	if (face_->style_flags & FT_STYLE_FLAG_BOLD) {
+		info.faceInfo_.bold_ = true;
+	}
+	else {
+		info.faceInfo_.bold_ = false;
+	}
+	if (face_->style_flags & FT_STYLE_FLAG_ITALIC) {
+		info.faceInfo_.italic_ = true;
+	}
+	else {
+		info.faceInfo_.italic_ = false;
+	}
+	info.faceInfo_.kerning_ = FT_HAS_KERNING(face_);
+
 	return info;
 }
 

@@ -33,12 +33,24 @@ class Font {
 		} Range;
 
 		typedef struct {
+			std::string name_;
+			std::string family_;
+			std::string style_;
+			size_t sizes_;
+			size_t glyphCount_;
+			bool bold_;
+			bool italic_;
+			bool kerning_;
+		} FaceInfo;
+
+		typedef struct {
 			size_t length_;
 			size_t emptyCount_;
 			size_t missingEmpty_;
 			size_t hitCount_;
 			Range size_;
 			std::wstring charmap_;
+			FaceInfo faceInfo_;
 		} TextInfo;
 
 		Font(const std::string & filename, int size);
@@ -73,6 +85,6 @@ class Font {
 	private:
 		FT_Library library_;
 		FT_Face face_;
-		size_t penDPI_;
 		size_t dpi_;
+		size_t penDPI_;
 };

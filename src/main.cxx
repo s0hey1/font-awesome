@@ -164,8 +164,42 @@ int main (int argc, char * argv[]) {
 
 		if (showMetrics) {
 			Font::TextInfo info = font.metrics(text);
+			std::cout << "Font Name: " << info.faceInfo_.name_ << std::endl;
+			std::cout << "Font Family: " << info.faceInfo_.family_ << std::endl;
+			std::cout << "Font Style: " << info.faceInfo_.style_ << std::endl;
+			std::cout << "Available Glyphs: " << info.faceInfo_.glyphCount_ << std::endl;
+			std::cout << "Available Sizes: " << info.faceInfo_.sizes_ << std::endl;
+			std::cout << "Bold: ";
+
+			if (info.faceInfo_.bold_) {
+				std::cout << "Yes";
+			}
+			else {
+				std::cout << "No";
+			}
+			std::cout << std::endl;
+
+			std::cout << "Italic: ";
+			if (info.faceInfo_.italic_) {
+				std::cout << "Yes";
+			}
+			else {
+				std::cout << "No";
+			}
+			std::cout << std::endl;
+
+			std::cout << "Kerning Available: ";
+			if (info.faceInfo_.kerning_) {
+				std::cout << "Yes";
+			}
+			else {
+				std::cout << "No";
+			}
+			std::cout << std::endl;
+
 			std::cout << "Text Length: " << info.length_ << std::endl;
 			std::cout << "Missing Empty Glyph: ";
+
 			if (info.missingEmpty_) {
 				std::cout << "Yes";
 			}
@@ -173,9 +207,10 @@ int main (int argc, char * argv[]) {
 				std::cout << "No";
 			}
 			std::cout << std::endl;
+
 			std::cout << "Renderable Glyphs: " << info.hitCount_ << std::endl;
 			std::cout << "Non-renderable Glyphs: " << info.emptyCount_ << std::endl;
-			std::cout << "Character Map:";
+			std::cout << "Character Map: ";
 			std::wcout << info.charmap_ << std::endl;
 			return EXIT_SUCCESS;
 		}
