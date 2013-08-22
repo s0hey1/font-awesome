@@ -186,6 +186,10 @@ bool Font::missingExists() const {
 	if (top == 0) {
 		return false;
 	}
+	// treat an empty glyph with no size as a missing empty glyph
+	if (face_->bitmap.width == 0 && face_->bitmap.rows == 0) {
+		return false;
+	}
 	return true;
 }
 
