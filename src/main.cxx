@@ -37,6 +37,7 @@ int main (int argc, char * argv[]) {
 	bool writeFile 			 = false;
 	bool showMetrics		 = false;
 	bool showGlyphInfo 		 = false;
+	bool showEmptyInfo		 = false;
 	std::string glyphChar;
 
 	// setup option parser
@@ -55,6 +56,7 @@ int main (int argc, char * argv[]) {
 		("debug", "only query the required canvas size to render text")
 		("metrics", "output font metrics instead of a rendered image")
 		("glyphinfo", boost::program_options::value<std::string>(&glyphChar), "output information about a specific glyph index")
+		("showempty", "display empty glyph information")
 		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
 	;
 
@@ -69,7 +71,7 @@ int main (int argc, char * argv[]) {
 		return EXIT_SUCCESS;
 	}
 	if (argMap.count("version")) {
-		std::cout << "font-awesome version " << FONTAWESOME_VERSION << std::endl;
+		std::wcout << "font-awesome version " << FONTAWESOME_VERSION << std::endl;
 		return EXIT_SUCCESS;
 	}
 
@@ -79,6 +81,9 @@ int main (int argc, char * argv[]) {
 
 	if (argMap.count("glyphinfo")) {
 		showGlyphInfo = true;
+	}
+	if (argMap.count("showempty")) {
+		showEmptyInfo = true;
 	}
 
 	if (!argMap.count("filename")) {
@@ -129,26 +134,28 @@ int main (int argc, char * argv[]) {
 	input.mode("rb");
 
 	// get text from stdin
-	if (useCodePoints) {
+	if (!showGlyphInfo) {
+		if (useCodePoints) {
+			if (debug) {
+				std::wcout << "using codepoints" << std::endl;
+			}
+			std::string characters;
+			while (std::cin.good()) {
+				std::cin >> characters;
+				wchar_t wc = atoi(characters.c_str());
+				text.push_back(wc);
+			}
+		}
+		else {
+			std::wstring wstr;
+			while (std::wcin.good()) {
+				std::getline(std::wcin, wstr);
+				text.append(wstr);
+			}
+		}
 		if (debug) {
-			std::cout << "using codepoints" << std::endl;
+			std::wcout << "Rendering text [" << text << "]" << std::endl;
 		}
-		std::string characters;
-		while (std::cin.good()) {
-			std::cin >> characters;
-			wchar_t wc = atoi(characters.c_str());
-			text.push_back(wc);
-		}
-	}
-	else {
-		std::wstring wstr;
-		while (std::wcin.good()) {
-			std::getline(std::wcin, wstr);
-			text.append(wstr);
-		}
-	}
-	if (debug) {
-		std::wcout << "Rendering text [" << text << "]" << std::endl;
 	}
 
 	// create font
@@ -171,77 +178,87 @@ int main (int argc, char * argv[]) {
 
 		if (showMetrics) {
 			Font::TextInfo info = font.metrics(text);
-			std::cout << "Text Input: ";
-			std::wcout << text << std::endl;
-			std::cout << "Font Name: " << info.faceInfo_.name_ << std::endl;
-			std::cout << "Font Family: " << info.faceInfo_.family_ << std::endl;
-			std::cout << "Font Style: " << info.faceInfo_.style_ << std::endl;
-			std::cout << "Available Glyphs: " << info.faceInfo_.glyphCount_ << std::endl;
-			std::cout << "Available Sizes: " << info.faceInfo_.sizes_ << std::endl;
-			std::cout << "Bold: ";
+			std::wcout << "Text Input: " << text << std::endl;
+			std::wcout << "Font Name: " << info.faceInfo_.name_.c_str() << std::endl;
+			std::wcout << "Font Family: " << info.faceInfo_.family_.c_str() << std::endl;
+			std::wcout << "Font Style: " << info.faceInfo_.style_.c_str() << std::endl;
+			std::wcout << "Available Glyphs: " << info.faceInfo_.glyphCount_ << std::endl;
+			std::wcout << "Available Sizes: " << info.faceInfo_.sizes_ << std::endl;
+			std::wcout << "Bold: ";
 
 			if (info.faceInfo_.bold_) {
-				std::cout << "Yes";
+				std::wcout << "Yes";
 			}
 			else {
-				std::cout << "No";
+				std::wcout << "No";
 			}
 			std::cout << std::endl;
 
-			std::cout << "Italic: ";
+			std::wcout << "Italic: ";
 			if (info.faceInfo_.italic_) {
-				std::cout << "Yes";
+				std::wcout << "Yes";
 			}
 			else {
-				std::cout << "No";
+				std::wcout << "No";
 			}
-			std::cout << std::endl;
+			std::wcout << std::endl;
 
-			std::cout << "Kerning Available: ";
+			std::wcout << "Kerning Available: ";
 			if (info.faceInfo_.kerning_) {
-				std::cout << "Yes";
+				std::wcout << "Yes";
 			}
 			else {
-				std::cout << "No";
+				std::wcout << "No";
 			}
-			std::cout << std::endl;
+			std::wcout << std::endl;
 
-			std::cout << "Text Length: " << info.length_ << std::endl;
-			std::cout << "Missing Empty Glyph: ";
+			std::wcout << "Text Length: " << info.length_ << std::endl;
+			std::wcout << "Missing Empty Glyph: ";
 
 			if (info.missingEmpty_) {
-				std::cout << "Yes";
+				std::wcout << "Yes";
 			}
 			else {
-				std::cout << "No";
+				std::wcout << "No";
 			}
-			std::cout << std::endl;
+			std::wcout << std::endl;
 
-			std::cout << "Renderable Glyphs: " << info.hitCount_ << std::endl;
-			std::cout << "Non-renderable Glyphs: " << info.emptyCount_ << std::endl;
-			std::cout << "Character Map: ";
-			std::wcout << info.charmap_ << std::endl;
+			std::wcout << "Renderable Glyphs: " << info.hitCount_ << std::endl;
+			std::wcout << "Non-renderable Glyphs: " << info.emptyCount_ << std::endl;
+			std::wcout << "Character Map: " << info.charmap_ << std::endl;
 			return EXIT_SUCCESS;
 		}
 
 		if (showGlyphInfo) {
-			wchar_t gc = atoi(glyphChar.c_str());
-			Font::Vector pen(0, 0);
-			Font::Glyph glyph = font.glyph(gc, pen);
-			std::cout << "Glyph Character: ";
-			std::wcout << gc << std::endl;
-			std::cout << "Index: " << glyph.index_ << std::endl;
-			std::cout << "Advance: [" << glyph.advance_.first << ", " << glyph.advance_.second << "]" << std::endl;
-			std::cout << "Size: [" << glyph.size_.first << "x" << glyph.size_.second << "]" << std::endl;
-			std::cout << "Position: [" << glyph.position_.first << ", " << glyph.position_.second << "]" << std::endl;
-			std::cout << "Empty: ";
-			if (glyph.empty_) {
-				std::cout << "Yes";
+			wchar_t gc;
+			if (useCodePoints) {
+				gc = atoi(glyphChar.c_str());
 			}
 			else {
-				std::cout << "No";
+				gc = glyphChar[0];
 			}
-			std::cout << std::endl;
+			Font::Vector pen(0, 0);
+			Font::Glyph glyph;
+			if (showEmptyInfo) {
+				glyph = font.emptyGlyph();
+			}
+			else {
+				glyph = font.glyph(gc, pen);
+			}
+			std::wcout << "Glyph Character: " << glyphChar.c_str() << std::endl;
+			std::wcout << "Glyph Codepoint: " << gc << std::endl;
+			std::wcout << "Index: " << glyph.index_ << std::endl;
+			std::wcout << "Advance: [" << glyph.advance_.first << ", " << glyph.advance_.second << "]" << std::endl;
+			std::wcout << "Size: [" << glyph.size_.first << "x" << glyph.size_.second << "]" << std::endl;
+			std::wcout << "Position: [" << glyph.position_.first << ", " << glyph.position_.second << "]" << std::endl;
+			std::wcout << "Empty: ";
+			if (glyph.empty_) {
+				std::wcout << "Yes";
+			}
+			else {
+				std::wcout << "No";
+			}
+			std::wcout << std::endl;
 			return EXIT_SUCCESS;
 		}
 
@@ -250,12 +267,12 @@ int main (int argc, char * argv[]) {
 
 		image = renderer.render(font, textColor, text, emptyColor);
 		if (writeFile && debug) {
-			std::cout << "Saving image to file [" << outfile << "]" << std::endl;
+			std::wcout << "Saving image to file [" << outfile.c_str() << "]" << std::endl;
 		}
 		FilePointer file(FilePointer::DIRECTION_OUT, outfile);
 		PNGWriter writer;
 		if (!writer.write(file, image)) {
-			std::cout << "Error writing image" << std::endl;
+			std::wcout << "Error writing image" << std::endl;
 		}
 	}
 	catch (FontAwesomeException const& ex) {

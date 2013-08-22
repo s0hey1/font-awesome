@@ -177,6 +177,27 @@ Font::Glyph Font::glyph(wchar_t character, Font::Vector pen) const {
 	return glyph;
 }
 
+Font::Glyph Font::emptyGlyph() const {
+	FT_GlyphSlot slot;
+	Glyph glyph;
+
+	FT_Load_Glyph(face_, 0, FT_LOAD_RENDER);
+
+	slot = face_->glyph;
+
+	glyph.index_ 			= 0;
+	glyph.empty_ 			= true;
+	glyph.advance_.first 	= slot->advance.x;
+	glyph.advance_.second 	= slot->advance.y;
+	glyph.bitmap_ 			= slot->bitmap.buffer;
+	glyph.position_.first 	= slot->bitmap_left;
+	glyph.position_.second 	= slot->bitmap_top;
+	glyph.size_.first 		= slot->bitmap.width;
+	glyph.size_.second 		= slot->bitmap.rows;
+
+	return glyph;
+}
+
 
 bool Font::missingExists() const {
 	size_t top;

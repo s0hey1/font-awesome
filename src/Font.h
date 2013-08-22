@@ -72,6 +72,11 @@ class Font {
 		 */
 		Glyph glyph(wchar_t character, Vector pen) const;
 
+		/**
+		 * Get the empty glyph
+		 */
+		Glyph emptyGlyph() const;
+
 		size_t penDPI() const;
 		size_t dpi() const;
 
