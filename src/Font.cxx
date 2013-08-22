@@ -126,6 +126,7 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 	info.faceInfo_.glyphCount_ = face_->num_glyphs;
 	info.faceInfo_.family_ = face_->family_name;
 	info.faceInfo_.style_ = face_->style_name;
+	info.faceInfo_.sizes_ = face_->num_fixed_sizes;
 	if (face_->style_flags & FT_STYLE_FLAG_BOLD) {
 		info.faceInfo_.bold_ = true;
 	}
