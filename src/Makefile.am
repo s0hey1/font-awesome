@@ -12,6 +12,7 @@ FontAwesomeException.cxx \
 Image.cxx \
 ImageWriter.cxx \
 PNGWriter.cxx \
+Printer.cxx \
 Renderer.cxx
 
 AM_CPPFLAGS = $(DEPS_CFLAGS) $(GCOV_CFLAGS) $(libpng_CFLAGS) $(freetype2_CFLAGS) $(BOOST_CPPFLAGS)

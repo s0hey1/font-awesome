@@ -140,6 +140,13 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 		info.faceInfo_.italic_ = false;
 	}
 	info.faceInfo_.kerning_ = FT_HAS_KERNING(face_);
+	info.faceInfo_.scalable_ = FT_IS_SCALABLE(face_);
+	if (info.faceInfo_.scalable_) {
+		info.faceInfo_.maxAdvance_ = face_->max_advance_width;
+	}
+	else {
+		info.faceInfo_.maxAdvance_ = face_->size->metrics.max_advance;
+	}
 
 	return info;
 }

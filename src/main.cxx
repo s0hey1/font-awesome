@@ -6,6 +6,7 @@
 #include "../version.h"
 #include "Color.h"
 #include "Font.h"
+#include "Printer.h"
 #include "FontAwesomeException.h"
 #include "FilePointer.h"
 #include "Image.h"
@@ -178,54 +179,8 @@ int main (int argc, char * argv[]) {
 
 		if (showMetrics) {
 			Font::TextInfo info = font.metrics(text);
-			std::wcout << "Text Input: " << text << std::endl;
-			std::wcout << "Font Name: " << info.faceInfo_.name_.c_str() << std::endl;
-			std::wcout << "Font Family: " << info.faceInfo_.family_.c_str() << std::endl;
-			std::wcout << "Font Style: " << info.faceInfo_.style_.c_str() << std::endl;
-			std::wcout << "Available Glyphs: " << info.faceInfo_.glyphCount_ << std::endl;
-			std::wcout << "Available Sizes: " << info.faceInfo_.sizes_ << std::endl;
-			std::wcout << "Bold: ";
-
-			if (info.faceInfo_.bold_) {
-				std::wcout << "Yes";
-			}
-			else {
-				std::wcout << "No";
-			}
-			std::cout << std::endl;
-
-			std::wcout << "Italic: ";
-			if (info.faceInfo_.italic_) {
-				std::wcout << "Yes";
-			}
-			else {
-				std::wcout << "No";
-			}
-			std::wcout << std::endl;
-
-			std::wcout << "Kerning Available: ";
-			if (info.faceInfo_.kerning_) {
-				std::wcout << "Yes";
-			}
-			else {
-				std::wcout << "No";
-			}
-			std::wcout << std::endl;
-
-			std::wcout << "Text Length: " << info.length_ << std::endl;
-			std::wcout << "Missing Empty Glyph: ";
-
-			if (info.missingEmpty_) {
-				std::wcout << "Yes";
-			}
-			else {
-				std::wcout << "No";
-			}
-			std::wcout << std::endl;
-
-			std::wcout << "Renderable Glyphs: " << info.hitCount_ << std::endl;
-			std::wcout << "Non-renderable Glyphs: " << info.emptyCount_ << std::endl;
-			std::wcout << "Character Map: " << info.charmap_ << std::endl;
+			Printer printer;
+			printer.printMetrics(text, info);
 			return EXIT_SUCCESS;
 		}
 
@@ -233,6 +188,7 @@ int main (int argc, char * argv[]) {
 			wchar_t gc;
 			if (useCodePoints) {
 				gc = atoi(glyphChar.c_str());
+				std::wcout << "Glyph Codepoint: " << gc << std::endl;
 			}
 			else {
 				gc = glyphChar[0];
@@ -245,20 +201,8 @@ int main (int argc, char * argv[]) {
 			else {
 				glyph = font.glyph(gc, pen);
 			}
-			std::wcout << "Glyph Character: " << glyphChar.c_str() << std::endl;
-			std::wcout << "Glyph Codepoint: " << gc << std::endl;
-			std::wcout << "Index: " << glyph.index_ << std::endl;
-			std::wcout << "Advance: [" << glyph.advance_.first << ", " << glyph.advance_.second << "]" << std::endl;
-			std::wcout << "Size: [" << glyph.size_.first << "x" << glyph.size_.second << "]" << std::endl;
-			std::wcout << "Position: [" << glyph.position_.first << ", " << glyph.position_.second << "]" << std::endl;
-			std::wcout << "Empty: ";
-			if (glyph.empty_) {
-				std::wcout << "Yes";
-			}
-			else {
-				std::wcout << "No";
-			}
-			std::wcout << std::endl;
+			Printer printer;
+			printer.printGlyphInfo(glyphChar, glyph);
 			return EXIT_SUCCESS;
 		}
 

@@ -42,6 +42,8 @@ class Font {
 			bool bold_;
 			bool italic_;
 			bool kerning_;
+			bool scalable_;
+			size_t maxAdvance_;
 		} FaceInfo;
 
 		typedef struct {
