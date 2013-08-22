@@ -19,6 +19,7 @@ class Font {
 		typedef std::pair<signed long, signed long> Vector;
 
 		typedef struct {
+				size_t index_;
 				unsigned char * bitmap_;
 				Vector advance_;
 				Vector size_;

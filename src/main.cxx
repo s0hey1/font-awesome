@@ -36,6 +36,8 @@ int main (int argc, char * argv[]) {
 	std::string outfile;
 	bool writeFile 			 = false;
 	bool showMetrics		 = false;
+	bool showGlyphInfo 		 = false;
+	std::string glyphChar;
 
 	// setup option parser
 	boost::program_options::options_description optsDesc("Allowed options");
@@ -52,6 +54,7 @@ int main (int argc, char * argv[]) {
 		("codepoints", "text specified as unicode code points")
 		("debug", "only query the required canvas size to render text")
 		("metrics", "output font metrics instead of a rendered image")
+		("glyphinfo", boost::program_options::value<std::string>(&glyphChar), "output information about a specific glyph index")
 		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
 	;
 
@@ -72,6 +75,10 @@ int main (int argc, char * argv[]) {
 
 	if (argMap.count("metrics")) {
 		showMetrics = true;
+	}
+
+	if (argMap.count("glyphinfo")) {
+		showGlyphInfo = true;
 	}
 
 	if (!argMap.count("filename")) {
@@ -164,6 +171,8 @@ int main (int argc, char * argv[]) {
 
 		if (showMetrics) {
 			Font::TextInfo info = font.metrics(text);
+			std::cout << "Text Input: ";
+			std::wcout << text << std::endl;
 			std::cout << "Font Name: " << info.faceInfo_.name_ << std::endl;
 			std::cout << "Font Family: " << info.faceInfo_.family_ << std::endl;
 			std::cout << "Font Style: " << info.faceInfo_.style_ << std::endl;
@@ -213,6 +222,26 @@ int main (int argc, char * argv[]) {
 			std::cout << "Character Map: ";
 			std::wcout << info.charmap_ << std::endl;
 			return EXIT_SUCCESS;
+		}
+
+		if (showGlyphInfo) {
+			wchar_t gc = atoi(glyphChar.c_str());
+			Font::Vector pen(0, 0);
+			Font::Glyph glyph = font.glyph(gc, pen);
+			std::cout << "Glyph Character: ";
+			std::wcout << gc << std::endl;
+			std::cout << "Index: " << glyph.index_ << std::endl;
+			std::cout << "Advance: [" << glyph.advance_.first << ", " << glyph.advance_.second << "]" << std::endl;
+			std::cout << "Size: [" << glyph.size_.first << "x" << glyph.size_.second << "]" << std::endl;
+			std::cout << "Position: [" << glyph.position_.first << ", " << glyph.position_.second << "]" << std::endl;
+			std::cout << "Empty: ";
+			if (glyph.empty_) {
+				std::cout << "Yes";
+			}
+			else {
+				std::cout << "No";
+			}
+			std::cout << std::endl;
 		}
 
 		boost::shared_ptr<Image> image;

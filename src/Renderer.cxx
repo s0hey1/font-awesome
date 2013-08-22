@@ -64,7 +64,7 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 		// if glyph is empty & fix missing is enabled then draw empty glyph
 		if (glyph.empty_ && missing_) {
 			if (debug_) {
-				std::cout << "empty glyph [" << text[index] << "] at index [" << index << "]" << std::endl;
+				std::cout << "empty glyph char [" << text[index] << "] at index [" << index << "]" << std::endl;
 			}
 			drawRect(image, pen.first / font.penDPI(), 0, glyph.advance_.first / font.penDPI(), image->height(), emptyColor);
 		}

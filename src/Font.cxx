@@ -165,6 +165,7 @@ Font::Glyph Font::glyph(wchar_t character, Font::Vector pen) const {
 
 	slot = face_->glyph;
 
+	glyph.index_ 			= index;
 	glyph.advance_.first 	= slot->advance.x;
 	glyph.advance_.second 	= slot->advance.y;
 	glyph.bitmap_ 			= slot->bitmap.buffer;
