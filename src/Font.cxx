@@ -78,7 +78,19 @@ Font::Range Font::size(const std::wstring & text) const {
 		miny = std::min(miny, top);
 		maxx = std::max(maxx, left + slot->bitmap.width);
 		maxy = std::max(maxy, top + slot->bitmap.rows);
-		pen.x += slot->advance.x;
+
+		if (slot->advance.x == 0) {
+			if (FT_IS_SCALABLE(face_)) {
+				pen.x += face_->max_advance_width;
+			}
+			else {
+				pen.x += face_->size->metrics.max_advance;
+			}
+		}
+		else {
+			pen.x += slot->advance.x;
+		}
+
 		pen.y += slot->advance.y;
 	}
 	maxx = std::max(maxx, static_cast<int>(pen.x / penDPI_));
@@ -151,6 +163,7 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 	return info;
 }
 
+
 Font::Glyph Font::glyph(wchar_t character, Font::Vector pen) const {
 	size_t index = FT_Get_Char_Index(face_, character);
 	FT_Vector ftPen;
@@ -172,9 +185,19 @@ Font::Glyph Font::glyph(wchar_t character, Font::Vector pen) const {
 
 	slot = face_->glyph;
 
-	glyph.index_ 			= index;
-	glyph.advance_.first 	= slot->advance.x;
+	if (slot->advance.x == 0) {
+		if (FT_IS_SCALABLE(face_)) {
+			glyph.advance_.first = face_->max_advance_width;
+		}
+		else {
+			glyph.advance_.first = face_->size->metrics.max_advance;
+		}
+	}
+	else {
+		glyph.advance_.first 	= slot->advance.x;
+	}
 	glyph.advance_.second 	= slot->advance.y;
+	glyph.index_ 			= index;
 	glyph.bitmap_ 			= slot->bitmap.buffer;
 	glyph.position_.first 	= slot->bitmap_left;
 	glyph.position_.second 	= slot->bitmap_top;
