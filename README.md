@@ -75,7 +75,7 @@ You can still test it on the command line using:
 You can test the unicode capabilities using:
 
 ```bash
-    $ cat unicode_sample.txt | ./font-awesome -f testfonts/5.otf -s 62 -v > output.png
+    $ cat tests/data/unicode_sample.txt | ./src/font-awesome --filename tests/data/2.otf --fontsize 62 --verbose > output.png
 ```
 
 ## CLI Options
@@ -110,6 +110,11 @@ There are several options for querying information about fonts.  The _--metrics_
 
 * Fix Python version (it used to segfault, and now it doesn't but it also no longer works right)
 * On OS X, if there are runtime crash issues with boost and libc, it may be necessary to install boost from source instead of relying on the prepackaged homebrew version.
+
+
+# License
+
+MIT
 
 
 # Contributors

@@ -28,13 +28,14 @@ function utf8_to_unicode($str) {
 
 mb_internal_encoding("UTF-8");
 $pipes = array();
-$cmd = "./font-awesome -v --text-color f0f000FF --as-codepoints -f testfonts/1.ttf >output.png";
+$path = realpath(__DIR__ . '/../');
+$cmd = "$path/src/font-awesome -v --color f0f000FF --codepoints -f $path/tests/data/1.ttf > output.png";
 $desc = array(
 	array("pipe", "rb"),
 	array("pipe", "wb"),
 	array("pipe", "w"),
 );
-$text = trim(file_get_contents("unicode_sample.txt"));
+$text = trim(file_get_contents("$path/tests/data/unicode_sample.txt"));
 $uctext = utf8_to_unicode($text);
 foreach($uctext as $v){
 	var_dump($v);
