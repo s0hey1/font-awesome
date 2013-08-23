@@ -61,22 +61,49 @@ The static boost option may be useful for production builds where you don't want
 
 # Usage
 
-Since font-awesome was made to interface with the php website,
-it takes its input through stdin, and dumps out the png file 
-through stdout.
+Since font-awesome was made to interface with the PHP website,
+it takes its input through stdin, and dumps out the PNG file 
+through STDOUT.
 
 You can still test it on the command line using:
 
-::
 
+```bash
     $ cat "Hello world" | ./font-awesome -f in_file.ttf -s 36 > output.png
-
+```
 
 You can test the unicode capabilities using:
 
-::
-
+```bash
     $ cat unicode_sample.txt | ./font-awesome -f testfonts/5.otf -s 62 -v > output.png
+```
+
+## CLI Options
+
+
+### Text Input
+
+The text to be rendered should be piped into the tool via STDIN.  The default input text mode is regular text strings.  If the _--codepoints_ flag is used then the input should be a series of unicode code points instead.  Each code point should be specified on a separate line.
+
+
+## Rendering Options
+
+The _--gracefulempty_ option can be used to force a 1x1 pixel transparent PNG to be output in cases when no text can actually be rendered.  The _--fix0glyph_ flag instructs the tool to draw a rectangle representing missing character glyphs in the input string.  This is useful for fonts which do not have their own missing glyph character defined.
+
+
+### Image Output
+
+The default mode is to send the PNG image data directly to STDOUT.  In some situations it may be more convenient to write the image directly to a file rather than piping or redirecting the output.  In those cases the _--outfile_ argument can be passed with the output image filename to be written to instead.
+
+
+### Text Color
+
+The text color can be controlled via the _--color_ and _--emptycolor_ options.  The arguments should be hex formatted RGBA color values.  The _--emptycolor_ option can be used to control the color used to render missing character glyphs.  By default missing glyphs will be rendered using the same color as normal characters.
+
+
+### Metrics
+
+There are several options for querying information about fonts.  The _--metrics_ flag will switch from outputting image data to displaying information about the text input string and the font itself.  The output information includes the total number of glyphs in the font and the count of characters in the text input which have corresponding renderable glyphs.  The _--glyphinfo_ option can be used to display information about a single glyph corresponding to the option's argument.  When paired with the _--showempty_ flag, information about the missing glyph will be displayed instead of the specified character glyph.
 
 
 # Issues 
