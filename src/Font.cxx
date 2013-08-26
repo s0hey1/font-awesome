@@ -125,16 +125,31 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 		}
 	}
 
-	FT_ULong charcode;
-	FT_UInt glyphIndex;
-	charcode = FT_Get_First_Char(face_, &glyphIndex);
-	while (glyphIndex != 0) {
-		info.charmap_.push_back(charcode);
-		charcode = FT_Get_Next_Char(face_, charcode, &glyphIndex);
+	switch (face_->charmap->encoding) {
+		case FT_ENCODING_NONE:
+			info.faceInfo_.encoding_ = "none";
+			break;
+		case FT_ENCODING_UNICODE:
+			info.faceInfo_.encoding_ = "unicode";
+			break;
+		case FT_ENCODING_ADOBE_STANDARD:
+			info.faceInfo_.encoding_ = "adobe standard";
+			break;
+		case FT_ENCODING_ADOBE_EXPERT:
+			info.faceInfo_.encoding_ = "adobe expert";
+			break;
+		case FT_ENCODING_MS_SYMBOL:
+			info.faceInfo_.encoding_ = "ms symbol";
+			break;
+		case FT_ENCODING_ADOBE_LATIN_1:
+			info.faceInfo_.encoding_ = "adobe latin 1";
+			break;
 	}
 
 	// populate info about the face itself
 	info.faceInfo_.name_ = FT_Get_Postscript_Name(face_);
+	info.faceInfo_.haveGlyphNames_ = FT_HAS_GLYPH_NAMES(face_);
+	info.faceInfo_.multipleMasters_ = FT_HAS_MULTIPLE_MASTERS(face_);
 	info.faceInfo_.glyphCount_ = face_->num_glyphs;
 	info.faceInfo_.family_ = face_->family_name;
 	info.faceInfo_.style_ = face_->style_name;
@@ -159,6 +174,25 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 	else {
 		info.faceInfo_.maxAdvance_ = face_->size->metrics.max_advance;
 	}
+
+	FT_ULong charcode;
+	FT_UInt glyphIndex;
+	charcode = FT_Get_First_Char(face_, &glyphIndex);
+	char glyphBuffer[255];
+
+	while (glyphIndex != 0) {
+		info.faceInfo_.charmap_.push_back(charcode);
+
+		if (info.faceInfo_.haveGlyphNames_) {
+			if (FT_Get_Glyph_Name(face_, glyphIndex, glyphBuffer, 255) != 0) {
+				throw new FontAwesomeException("Error getting glyph name.");
+			}
+			info.faceInfo_.glyphNames_.push_back(glyphBuffer);
+		}
+
+		charcode = FT_Get_Next_Char(face_, charcode, &glyphIndex);
+	}
+
 
 	return info;
 }

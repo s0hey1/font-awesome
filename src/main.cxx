@@ -40,6 +40,7 @@ int main (int argc, char * argv[]) {
 	bool showGlyphInfo 		 = false;
 	bool showEmptyInfo		 = false;
 	std::string glyphChar;
+	Printer::Format format 	 = Printer::FORMAT_RAW;
 
 	// setup option parser
 	boost::program_options::options_description optsDesc("Allowed options");
@@ -59,6 +60,7 @@ int main (int argc, char * argv[]) {
 		("glyphinfo", boost::program_options::value<std::string>(&glyphChar), "output information about a specific glyph index")
 		("showempty", "display empty glyph information")
 		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
+		("json,j", "output metric data in JSON format")
 	;
 
 	// parse options
@@ -110,6 +112,9 @@ int main (int argc, char * argv[]) {
 	}
 	if (argMap.count("codepoints")) {
 		useCodePoints = true;
+	}
+	if (argMap.count("json")) {
+		format = Printer::FORMAT_JSON;
 	}
 
 	setlocale(LC_ALL, "");
@@ -179,7 +184,7 @@ int main (int argc, char * argv[]) {
 
 		if (showMetrics) {
 			Font::TextInfo info = font.metrics(text);
-			Printer printer;
+			Printer printer(format);
 			printer.printMetrics(text, info);
 			return EXIT_SUCCESS;
 		}
@@ -201,7 +206,7 @@ int main (int argc, char * argv[]) {
 			else {
 				glyph = font.glyph(gc, pen);
 			}
-			Printer printer;
+			Printer printer(format);
 			printer.printGlyphInfo(glyphChar, glyph);
 			return EXIT_SUCCESS;
 		}

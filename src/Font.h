@@ -10,6 +10,7 @@
 
 #include <string>
 #include <utility> // for pair
+#include <vector>
 
 /**
  * A FreeType2 Font
@@ -44,6 +45,11 @@ class Font {
 			bool kerning_;
 			bool scalable_;
 			size_t maxAdvance_;
+			std::vector<wchar_t> charmap_;
+			std::string encoding_;
+			bool haveGlyphNames_;
+			bool multipleMasters_;
+			std::vector<std::string> glyphNames_;
 		} FaceInfo;
 
 		typedef struct {
@@ -52,7 +58,6 @@ class Font {
 			size_t missingEmpty_;
 			size_t hitCount_;
 			Range size_;
-			std::wstring charmap_;
 			FaceInfo faceInfo_;
 		} TextInfo;
 
