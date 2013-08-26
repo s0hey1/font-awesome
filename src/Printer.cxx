@@ -71,6 +71,9 @@ std::string Printer::printPropertyValue(const std::vector<std::string> & array, 
 		index++;
 		if (format_ == FORMAT_JSON) {
 			ss << "\"";
+			if ((*it) == std::string("\"")) {
+				ss << "\\";
+			}
 		}
 		ss << (*it);
 		if (format_ == FORMAT_JSON) {
@@ -123,10 +126,15 @@ std::wstring Printer::printPropertyValue(const std::vector<wchar_t> & array, boo
 	if (format_ == FORMAT_JSON) {
 		ss << L"[";
 	}
+	wchar_t quote = '"';
+	wchar_t backslash = '\\';
 	for (; it != array.end(); ++it) {
 		index++;
 		if (format_ == FORMAT_JSON) {
 			ss << L"\"";
+			if ((*it) == quote || (*it) == backslash) {
+				ss << L"\\";
+			}
 		}
 		ss << (*it);
 		if (format_ == FORMAT_JSON) {
@@ -245,6 +253,7 @@ void Printer::printBooleanProperty(const std::string & label, bool value) const 
 		else {
 			std::wcout << "false";
 		}
+		std::wcout << ",";
 	}
 	else {
 
