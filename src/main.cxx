@@ -61,6 +61,7 @@ int main (int argc, char * argv[]) {
 		("showempty", "display empty glyph information")
 		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
 		("json,j", "output metric data in JSON format")
+		("xml,x", "output metric data in XML format")
 	;
 
 	// parse options
@@ -113,8 +114,12 @@ int main (int argc, char * argv[]) {
 	if (argMap.count("codepoints")) {
 		useCodePoints = true;
 	}
+
 	if (argMap.count("json")) {
 		format = Printer::FORMAT_JSON;
+	}
+	else if (argMap.count("xml")) {
+		format = Printer::FORMAT_XML;
 	}
 
 	setlocale(LC_ALL, "");
@@ -184,7 +189,7 @@ int main (int argc, char * argv[]) {
 
 		if (showMetrics) {
 			Font::TextInfo info = font.metrics(text);
-			Printer printer(format);
+			Printer printer(format, useCodePoints);
 			printer.printMetrics(text, info);
 			return EXIT_SUCCESS;
 		}
@@ -206,7 +211,7 @@ int main (int argc, char * argv[]) {
 			else {
 				glyph = font.glyph(gc, pen);
 			}
-			Printer printer(format);
+			Printer printer(format, useCodePoints);
 			printer.printGlyphInfo(glyphChar, glyph);
 			return EXIT_SUCCESS;
 		}

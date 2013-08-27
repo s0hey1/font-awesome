@@ -7,7 +7,7 @@ font-awesome is a command line tool to render TTF/OTF fonts to PNG.
 * [FreeType 2](http://www.freetype.org/freetype2/)
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
 * [boost](http://www.boost.org/)
-
+* [icu](http://site.icu-project.org/)
 
 ## Ubuntu
 
@@ -103,7 +103,7 @@ The text color can be controlled via the _--color_ and _--emptycolor_ options.  
 
 ### Metrics
 
-There are several options for querying information about fonts.  The _--metrics_ flag will switch from outputting image data to displaying information about the text input string and the font itself.  The output information includes the total number of glyphs in the font and the count of characters in the text input which have corresponding renderable glyphs.  The _--glyphinfo_ option can be used to display information about a single glyph corresponding to the option's argument.  When paired with the _--showempty_ flag, information about the missing glyph will be displayed instead of the specified character glyph.
+There are several options for querying information about fonts.  The _--metrics_ flag will switch from outputting image data to displaying information about the text input string and the font itself.  The output information includes the total number of glyphs in the font and the count of characters in the text input which have corresponding renderable glyphs.  The _--glyphinfo_ option can be used to display information about a single glyph corresponding to the option's argument.  When paired with the _--showempty_ flag, information about the missing glyph will be displayed instead of the specified character glyph.  The format of the output data is either JSON or XML depending on whether the _--json_ or _--xml_ flag is used.  If the _--codepoints_ flag is included then the character map data will list the Unicode code points instead of the actual characters.
 
 
 # Issues 
