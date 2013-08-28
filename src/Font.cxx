@@ -7,6 +7,7 @@
 #include "FontAwesomeException.h"
 
 #include <algorithm>
+#include <iostream>
 
 Font::Font(const std::string & filename, int size) :
 	dpi_(100),
@@ -125,25 +126,30 @@ Font::TextInfo Font::metrics(const std::wstring & text) const {
 		}
 	}
 
-	switch (face_->charmap->encoding) {
-		case FT_ENCODING_NONE:
-			info.faceInfo_.encoding_ = "none";
-			break;
-		case FT_ENCODING_UNICODE:
-			info.faceInfo_.encoding_ = "unicode";
-			break;
-		case FT_ENCODING_ADOBE_STANDARD:
-			info.faceInfo_.encoding_ = "adobe standard";
-			break;
-		case FT_ENCODING_ADOBE_EXPERT:
-			info.faceInfo_.encoding_ = "adobe expert";
-			break;
-		case FT_ENCODING_MS_SYMBOL:
-			info.faceInfo_.encoding_ = "ms symbol";
-			break;
-		case FT_ENCODING_ADOBE_LATIN_1:
-			info.faceInfo_.encoding_ = "adobe latin 1";
-			break;
+	if (!face_->charmap) {
+		info.faceInfo_.encoding_ = "missing";
+	}
+	else {
+		switch (face_->charmap->encoding) {
+			case FT_ENCODING_NONE:
+				info.faceInfo_.encoding_ = "none";
+				break;
+			case FT_ENCODING_UNICODE:
+				info.faceInfo_.encoding_ = "unicode";
+				break;
+			case FT_ENCODING_ADOBE_STANDARD:
+				info.faceInfo_.encoding_ = "adobe standard";
+				break;
+			case FT_ENCODING_ADOBE_EXPERT:
+				info.faceInfo_.encoding_ = "adobe expert";
+				break;
+			case FT_ENCODING_MS_SYMBOL:
+				info.faceInfo_.encoding_ = "ms symbol";
+				break;
+			case FT_ENCODING_ADOBE_LATIN_1:
+				info.faceInfo_.encoding_ = "adobe latin 1";
+				break;
+		}
 	}
 
 	// populate info about the face itself
