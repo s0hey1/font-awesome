@@ -26,8 +26,15 @@ AC_LANG_POP([C++])
 AX_WARNINGS_SANITIZE
 AC_CACHE_SAVE
 
-#AX_CHECK_ICU([4.2])
-m4_include(m4/icu.m4)
+AC_ARG_WITH(icu-config, 
+  [AC_HELP_STRING([--with-icu-config=<FILEPATH>],
+    [Provide an alternative path to the icu-config tool])],
+    ICU_CONFIG=$withval,
+    ICU_CONFIG=""
+    )
+
+AX_CHECK_ICU([4.2])
+#m4_include(m4/icu.m4)
 
 BOOST_REQUIRE([1.40])
 BOOST_PROGRAM_OPTIONS
