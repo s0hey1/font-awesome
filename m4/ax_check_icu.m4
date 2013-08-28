@@ -56,13 +56,11 @@ AC_DEFUN([AX_CHECK_ICU], [
             AC_MSG_RESULT(yes)
             succeeded=yes
 
-        if test $enable_static_icu = yes; then
-            static_cpp_opt="-DU_STATIC_IMPLEMENTATION"
-            static_lib_opt="-static"
-        else
-            static_cpp_opt=""
-            static_lib_opt=""
-        fi
+            if test $enable_static_icu = yes; then
+                static_cpp_opt="-DU_STATIC_IMPLEMENTATION"
+            else
+                static_cpp_opt=""
+            fi
 
             AC_MSG_CHECKING(ICU_CPPFLAGS)
             ICU_CPPFLAGS=`$ICU_CONFIG --cppflags`
@@ -78,8 +76,14 @@ AC_DEFUN([AX_CHECK_ICU], [
             AC_MSG_RESULT($ICU_CXXFLAGS)
 
             AC_MSG_CHECKING(ICU_LIBS)
-            ICU_LIBS=`$ICU_CONFIG --ldflags`
-            ICU_LIBS="$static_lib_opt $ICU_LIBS"
+            if test $enable_static_icu = yes; then
+                ICU_SYSTEM_LIBS=`$ICU_CONFIG --ldflags-system`
+                ICU_LIBS_SEARCHPATH=$($ICU_CONFIG --ldflags-searchpath | sed -e 's/\-L//g' | sed -e 's/\//\\\//g')
+                ICU_LIBS=$($ICU_CONFIG --ldflags-libsonly | sed -e 's/ /.a /g' | sed -e "s/-l/$ICU_LIBS_SEARCHPATH/g" | sed -e 's/lib /lib\/lib/g')
+                ICU_LIBS="$ICU_SYSTEM_LIBS $ICU_LIBS"
+            else
+                ICU_LIBS=`$ICU_CONFIG --ldflags`
+            fi
             AC_MSG_RESULT($ICU_LIBS)
         else
             ICU_CPPFLAGS=""
