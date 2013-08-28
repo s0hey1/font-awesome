@@ -21,9 +21,24 @@
 
 #serial 6
 
+
+# ICU_STATIC()
+# --------------
+# Add the "--enable-static-icu" configure argument. If this argument is given
+# on the command line, static versions of the libraries will be looked up.
+AC_DEFUN([ICU_STATIC],
+  [AC_ARG_ENABLE([static-icu],
+     [AC_HELP_STRING([--enable-static-icu],
+               [Prefer the static icu libraries over the shared ones [no]])],
+     [enable_static_icu=yes],
+     [enable_static_icu=no])])# ICU_STATIC
+
+
 AU_ALIAS([AC_CHECK_ICU], [AX_CHECK_ICU])
 AC_DEFUN([AX_CHECK_ICU], [
   succeeded=no
+
+  AC_REQUIRE([ICU_STATIC])
 
   if test -z "$ICU_CONFIG"; then
     AC_PATH_PROG(ICU_CONFIG, icu-config, no)
@@ -41,8 +56,17 @@ AC_DEFUN([AX_CHECK_ICU], [
             AC_MSG_RESULT(yes)
             succeeded=yes
 
+        if test $enable_static_icu = yes; then
+            static_cpp_opt="-DU_STATIC_IMPLEMENTATION"
+            static_lib_opt="-static"
+        else
+            static_cpp_opt=""
+            static_lib_opt=""
+        fi
+
             AC_MSG_CHECKING(ICU_CPPFLAGS)
             ICU_CPPFLAGS=`$ICU_CONFIG --cppflags`
+            ICU_CPPFLAGS="$ICU_CPPFLAGS $static_cpp_opt"
             AC_MSG_RESULT($ICU_CPPFLAGS)
 
             AC_MSG_CHECKING(ICU_CFLAGS)
@@ -55,6 +79,7 @@ AC_DEFUN([AX_CHECK_ICU], [
 
             AC_MSG_CHECKING(ICU_LIBS)
             ICU_LIBS=`$ICU_CONFIG --ldflags`
+            ICU_LIBS="$static_lib_opt $ICU_LIBS"
             AC_MSG_RESULT($ICU_LIBS)
         else
             ICU_CPPFLAGS=""
