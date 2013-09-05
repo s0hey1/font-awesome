@@ -38,8 +38,13 @@ class Font {
 			std::string name_;
 			std::string family_;
 			std::string style_;
+			std::string format_;
 			size_t sizes_;
 			size_t glyphCount_;
+			bool spline_;
+			std::vector<std::pair<std::wstring, std::wstring> > splineNames_;
+			bool horizontal_;
+			bool vertical_;
 			bool bold_;
 			bool italic_;
 			bool kerning_;
@@ -94,6 +99,8 @@ class Font {
 
 	protected:
 		void release();
+		std::wstring splineNameFromId(int id) const;
+		std::wstring splinePlatformFromId(int id) const;
 
 	private:
 		FT_Library library_;

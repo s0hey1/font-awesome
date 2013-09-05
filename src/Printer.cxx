@@ -45,11 +45,15 @@ void Printer::printMetrics(const std::wstring & text, const Font::TextInfo & inf
 	pt.put(mapKeyName(L"Font Name"), info.faceInfo_.name_.c_str());
 	pt.put(mapKeyName(L"Font Family"), info.faceInfo_.family_.c_str());
 	pt.put(mapKeyName(L"Font Style"), info.faceInfo_.style_.c_str());
+	pt.put(mapKeyName(L"Font Format"), info.faceInfo_.format_.c_str());
 	pt.put(mapKeyName(L"Available Glyphs"), info.faceInfo_.glyphCount_);
 	pt.put(mapKeyName(L"Available Sizes"), info.faceInfo_.sizes_);
 
 	pt.put(mapKeyName(L"Bold"), info.faceInfo_.bold_);
 	pt.put(mapKeyName(L"Italic"), info.faceInfo_.italic_);
+	pt.put(mapKeyName(L"Spline"), info.faceInfo_.spline_);
+	pt.put(mapKeyName(L"Horizontal"), info.faceInfo_.horizontal_);
+	pt.put(mapKeyName(L"Vertical"), info.faceInfo_.vertical_);
 	pt.put(mapKeyName(L"Kerning Available"), info.faceInfo_.kerning_);
 	pt.put(mapKeyName(L"Scalable"), info.faceInfo_.scalable_);
 	pt.put(mapKeyName(L"Have Glyph Names"), info.faceInfo_.haveGlyphNames_);
@@ -62,17 +66,32 @@ void Printer::printMetrics(const std::wstring & text, const Font::TextInfo & inf
 	pt.put(mapKeyName(L"Encoding"), info.faceInfo_.encoding_.c_str());
 
 
+	boost::property_tree::wptree arrayChild;
+	boost::property_tree::wptree arrayElement;
+	std::wstring childKey;
+
+	std::vector<std::pair<std::wstring, std::wstring> >::const_iterator splineIterator = info.faceInfo_.splineNames_.begin();
+	if (info.faceInfo_.splineNames_.size() > 0) {
+		std::wstring splineKeyName = mapKeyName(L"SFNT Names");
+		for (; splineIterator != info.faceInfo_.splineNames_.end(); ++splineIterator) {
+			childKey = mapKeyName(splineIterator->first);
+			arrayElement.put_value(splineIterator->second);
+			arrayChild.push_back(std::make_pair(childKey, arrayElement));
+		}
+		pt.put_child(splineKeyName, arrayChild);
+		arrayChild.clear();
+	}
+
+
+
 	std::vector<wchar_t>::const_iterator it = info.faceInfo_.charmap_.begin();
 	std::wstring charmapKeyName = mapKeyName(L"Character Map");
-	std::wstring childKey;
 	if (format_ == FORMAT_XML) {
 		childKey = mapKeyName(L"Char");
 	}
 	else {
 		childKey = L"";
 	}
-	boost::property_tree::wptree arrayChild;
-	boost::property_tree::wptree arrayElement;
 	icu::UnicodeString ucs;
 	for (; it != info.faceInfo_.charmap_.end(); ++it) {
 		if (codepoints_) {
