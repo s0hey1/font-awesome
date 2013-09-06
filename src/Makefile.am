@@ -9,6 +9,7 @@ Color.cxx \
 FilePointer.cxx \
 Font.cxx \
 FontAwesomeException.cxx \
+FontInfo.cxx \
 Image.cxx \
 ImageWriter.cxx \
 PNGWriter.cxx \

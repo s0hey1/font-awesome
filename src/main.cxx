@@ -188,7 +188,8 @@ int main (int argc, char * argv[]) {
 		}
 
 		if (showMetrics) {
-			Font::TextInfo info = font.metrics(text);
+			FontInfo info;
+			info.parse(font, text);
 			Printer printer(format, useCodePoints);
 			printer.printMetrics(text, info);
 			return EXIT_SUCCESS;
@@ -203,8 +204,8 @@ int main (int argc, char * argv[]) {
 			else {
 				gc = glyphChar[0];
 			}
-			Font::Vector pen(0, 0);
-			Font::Glyph glyph;
+			Glyph::Vector pen(0, 0);
+			Glyph glyph;
 			if (showEmptyInfo) {
 				glyph = font.emptyGlyph();
 			}

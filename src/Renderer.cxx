@@ -50,7 +50,7 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 	}
 
 	size_t penDPI = font.penDPI();
-	Font::Vector pen;
+	Glyph::Vector pen;
 	pen.first = (0 - range.min_.first) * penDPI;
 	pen.second = range.max_.second * penDPI;
 
@@ -59,7 +59,7 @@ boost::shared_ptr<Image> Renderer::render(const Font & font, const Color & color
 		std::cout << "rendering [" << length << "] characters to image [" << image->width() << "x" << image->height() << "]" << std::endl;
 	}
 	for (size_t index = 0; index < length; ++index) {
-		Font::Glyph glyph = font.glyph(text[index], pen);
+		Glyph glyph = font.glyph(text[index], pen);
 
 		// if glyph is empty & fix missing is enabled then draw empty glyph
 		if (glyph.empty_ && missing_) {
@@ -126,7 +126,7 @@ void Renderer::drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t
 	}
 }
 
-void Renderer::blit(const boost::shared_ptr<Image> & image, const Font::Glyph & glyph, const Color & color) {
+void Renderer::blit(const boost::shared_ptr<Image> & image, const Glyph & glyph, const Color & color) {
 	size_t width  		= glyph.size_.first;
 	size_t height 		= glyph.size_.second;
 	size_t canvasWidth  = image->width();

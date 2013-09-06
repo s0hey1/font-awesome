@@ -24,7 +24,7 @@ class Renderer {
 		~Renderer();
 
 		boost::shared_ptr<Image> render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor);
-		void blit(const boost::shared_ptr<Image> & image, const Font::Glyph & glyph, const Color & color);
+		void blit(const boost::shared_ptr<Image> & image, const Glyph & glyph, const Color & color);
 		void drawRect(const boost::shared_ptr<Image> & image, size_t x, size_t y, size_t width, size_t height, const Color & color);
 		void drawPoint(const boost::shared_ptr<Image> & image, size_t pixel, const Color & color, unsigned char alpha);
 

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Font.h"
+#include "FontInfo.h"
 
 class Printer {
 	public:
@@ -18,8 +18,8 @@ class Printer {
 
 		Printer(Format format, bool useCodepoints);
 
-		void printMetrics(const std::wstring & text, const Font::TextInfo & info) const;
-		void printGlyphInfo(const std::string & character, const Font::Glyph & glyph) const;
+		void printMetrics(const std::wstring & text, const FontInfo & info) const;
+		void printGlyphInfo(const std::string & character, const Glyph & glyph) const;
 
 	protected:
 		std::wstring mapKeyName(const std::wstring & label) const;
