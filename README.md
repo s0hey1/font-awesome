@@ -7,7 +7,9 @@ font-awesome is a command line tool to render TTF/OTF fonts to PNG.
 * [FreeType 2](http://www.freetype.org/freetype2/)
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
 * [boost](http://www.boost.org/)
-* [icu](http://site.icu-project.org/)
+* [ICU](http://site.icu-project.org/)
+* [HarfBuzz](http://www.freedesktop.org/wiki/Software/HarfBuzz/)
+* [Cairo](http://www.cairographics.org/)
 
 ## Ubuntu
 

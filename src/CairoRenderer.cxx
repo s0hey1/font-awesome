@@ -7,13 +7,16 @@
 #include "Image.h"
 #include "FontAwesomeException.h"
 
-#include <harfbuzz/hb.h>
-#include <harfbuzz/hb-ft.h>
-#include <harfbuzz/hb-icu.h>
+// HarfBuzz
+#include <hb.h>
+#include <hb-ft.h>
+#include <hb-icu.h>
 
-#include <cairo/cairo.h>
-#include <cairo/cairo-ft.h>
+// Cairo
+#include <cairo.h>
+#include <cairo-ft.h>
 
+// ICU
 #include <unicode/unistr.h>
 
 #include <vector>
