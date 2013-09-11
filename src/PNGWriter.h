@@ -15,5 +15,5 @@ class PNGWriter : public ImageWriter {
 		PNGWriter();
 		~PNGWriter();
 
-		virtual bool write(FilePointer & file, const boost::shared_ptr<Image> & img);
+		virtual bool write(FilePointer & file, const boost::shared_ptr<Image> & img, bool flip = false);
 };

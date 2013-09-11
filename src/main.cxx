@@ -11,7 +11,8 @@
 #include "FilePointer.h"
 #include "Image.h"
 #include "PNGWriter.h"
-#include "Renderer.h"
+#include "PixelRenderer.h"
+#include "CairoRenderer.h"
 
 #include <iostream>
 #include <string>
@@ -35,6 +36,7 @@ int main (int argc, char * argv[]) {
 	Color emptyColor;
 	std::wstring text;
 	std::string outfile;
+	std::string backend;
 	bool writeFile 			 = false;
 	bool showMetrics		 = false;
 	bool showGlyphInfo 		 = false;
@@ -62,6 +64,7 @@ int main (int argc, char * argv[]) {
 		("outfile", boost::program_options::value<std::string>(&outfile), "save image to filename")
 		("json,j", "output metric data in JSON format")
 		("xml,x", "output metric data in XML format")
+		("backend,b", boost::program_options::value<std::string>(&backend)->default_value("pixel"), "specify font rendering backend (pixel or cairo)")
 	;
 
 	// parse options
@@ -217,16 +220,29 @@ int main (int argc, char * argv[]) {
 			return EXIT_SUCCESS;
 		}
 
-		boost::shared_ptr<Image> image;
-		Renderer renderer(debug, gracefulEmptyOutput, fixMissingGlyph);
 
-		image = renderer.render(font, textColor, text, emptyColor);
+		boost::shared_ptr<Image> 	image;
+		boost::shared_ptr<Renderer> renderer;
+		bool						flip = false;
+		if (backend == "pixel") {
+			renderer.reset(new PixelRenderer(debug, gracefulEmptyOutput, fixMissingGlyph));
+		}
+		else if (backend == "cairo") {
+			renderer.reset(new CairoRenderer(debug, gracefulEmptyOutput, fixMissingGlyph));
+			flip = true;
+		}
+		else {
+			std::cerr << "Unsupported rendering backend: " << backend << std::endl;
+			return EXIT_FAILURE;
+		}
+
+		image = renderer->render(font, textColor, text, emptyColor);
 		if (writeFile && debug) {
 			std::wcout << "Saving image to file [" << outfile.c_str() << "]" << std::endl;
 		}
 		FilePointer file(FilePointer::DIRECTION_OUT, outfile);
 		PNGWriter writer;
-		if (!writer.write(file, image)) {
+		if (!writer.write(file, image, flip)) {
 			std::wcout << "Error writing image" << std::endl;
 		}
 	}

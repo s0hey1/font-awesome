@@ -91,6 +91,11 @@ The text to be rendered should be piped into the tool via STDIN.  The default in
 The _--gracefulempty_ option can be used to force a 1x1 pixel transparent PNG to be output in cases when no text can actually be rendered.  The _--fix0glyph_ flag instructs the tool to draw a rectangle representing missing character glyphs in the input string.  This is useful for fonts which do not have their own missing glyph character defined.
 
 
+### Backends
+
+Text can be rendered using either one of two different backends chosen using the _--backend_ argument.  Valid values are _pixel_ and _cairo_.  The pixel rendering backend is the original implementation.  It simply copies rasterized FreeType glyphs directly into an image buffer.  Kerning and advanced multi-glyph ligature features are not supported by this backend.  The Cairo backend should be used if you need to support these font features.
+
+
 ### Image Output
 
 The default mode is to send the PNG image data directly to STDOUT.  In some situations it may be more convenient to write the image directly to a file rather than piping or redirecting the output.  In those cases the _--outfile_ argument can be passed with the output image filename to be written to instead.

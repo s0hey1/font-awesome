@@ -28,6 +28,13 @@ class Font {
 		~Font();
 
 		/**
+		 * Get the point size of the font
+		 *
+		 * @return int
+		 */
+		int pointSize() const;
+
+		/**
 		 * Get the space required to render a string of text
 		 */
 		Range size(const std::wstring & text) const;
@@ -62,4 +69,5 @@ class Font {
 		FT_Face face_;
 		size_t dpi_;
 		size_t penDPI_;
+		int size_;
 };

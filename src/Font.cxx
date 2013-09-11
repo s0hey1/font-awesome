@@ -11,7 +11,8 @@
 
 Font::Font(const std::string & filename, int size) :
 	dpi_(100),
-	penDPI_(64)
+	penDPI_(64),
+	size_(size)
 {
 	FT_Error error;
 	if ((error = FT_Init_FreeType(&library_)) != 0) {
@@ -38,6 +39,10 @@ Font::Font(const std::string & filename, int size) :
 
 Font::~Font() {
 	release();
+}
+
+int Font::pointSize() const {
+	return size_;
 }
 
 size_t Font::penDPI() const {

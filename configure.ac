@@ -1,4 +1,4 @@
-AC_INIT([font-awesome], [1.4.0], [josh@creativemarket.com], [font-awesome], [https://www.creativemarket.com])
+AC_INIT([font-awesome], [1.5.0], [josh@creativemarket.com], [font-awesome], [https://www.creativemarket.com])
 AC_PREREQ([2.59])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
@@ -49,6 +49,11 @@ PKG_PROG_PKG_CONFIG([0.2])
 
 PKG_CHECK_MODULES([libpng], [libpng])
 PKG_CHECK_MODULES([freetype2], [freetype2])
+
+PKG_CHECK_MODULES([cairo], [cairo])
+#PKG_CHECK_MODULES([icu_cu], [icu-cu])
+PKG_CHECK_MODULES([harfbuzz], [harfbuzz])
+PKG_CHECK_MODULES([harfbuzz_icu], [harfbuzz-icu])
 
 AC_ARG_WITH(jpeg, 
 	[AC_HELP_STRING([--with-jpeg=<DIR>],

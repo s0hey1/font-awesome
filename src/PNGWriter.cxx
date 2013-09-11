@@ -39,7 +39,7 @@ static void pngtest_error(png_structp png_ptr, png_const_charp message) {
 }
 
 
-bool PNGWriter::write(FilePointer & file, const boost::shared_ptr<Image> & img) {
+bool PNGWriter::write(FilePointer & file, const boost::shared_ptr<Image> & img, bool flip) {
 	png_structp png_ptr;
 	png_infop info_ptr;
 
@@ -104,10 +104,20 @@ bool PNGWriter::write(FilePointer & file, const boost::shared_ptr<Image> & img) 
 	}
 
 	png_bytep data = img->data();
-	j = height - 1;
+	if (flip) {
+		j = 0;
+	}
+	else {
+		j = height - 1;
+	}
 	for (k = 0; k < height; k++) {
 		row_pointers[j] = data + k*width*bytes_per_pixel;
-		j--;
+		if (flip) {
+			j++;
+		}
+		else {
+			j--;
+		}
 	}
 
 	png_write_image(png_ptr, row_pointers);
