@@ -12,6 +12,13 @@
  */
 class Color {
 	public:
+		typedef enum Channel {
+			CHANNEL_RED,
+			CHANNEL_GREEN,
+			CHANNEL_BLUE,
+			CHANNEL_ALPHA
+		} Channel;
+
 		/**
 		 * Default constructor
 		 */
@@ -29,6 +36,8 @@ class Color {
 		unsigned char blue() const;
 		unsigned char green() const;
 		unsigned char alpha() const;
+
+		float floatVal(Channel channel) const;
 
 	private:
 		unsigned char red_;

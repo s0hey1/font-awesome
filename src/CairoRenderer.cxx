@@ -128,8 +128,13 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, pixelWidth);
 	cairoSurface = cairo_image_surface_create_for_data(image->data(), CAIRO_FORMAT_ARGB32, pixelWidth, pixelHeight, stride);
 	cairoContext = cairo_create(cairoSurface);
-
-	cairo_set_source_rgba(cairoContext, color.blue(), color.green(), color.red(), 1.0);
+	cairo_set_source_rgba(
+		cairoContext, 
+		color.floatVal(Color::CHANNEL_BLUE), 
+		color.floatVal(Color::CHANNEL_GREEN), 
+		color.floatVal(Color::CHANNEL_RED), 
+		color.floatVal(Color::CHANNEL_ALPHA)
+	);
 	//cairo_set_font_face(cairoContext, cairoFace);
 	cairo_set_scaled_font(cairoContext, scaledFont);
 	cairo_set_font_size(cairoContext, font.pointSize());

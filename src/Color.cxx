@@ -20,6 +20,26 @@ Color::Color(const std::string & hex) {
 	fromHex(hex);
 }
 
+float Color::floatVal(Channel channel) const {
+	unsigned char c;
+	switch (channel) {
+		case CHANNEL_RED:
+			c = red_;
+			break;
+		case CHANNEL_GREEN:
+			c = green_;
+			break;
+		case CHANNEL_BLUE:
+			c = blue_;
+			break;
+		case CHANNEL_ALPHA:
+			c = alpha_;
+			break;
+	}
+	float val = c / 255.;
+	return val;
+}
+
 
 bool Color::fromHex(const std::string & hex) {
 	if (!validateHex(hex)) {
