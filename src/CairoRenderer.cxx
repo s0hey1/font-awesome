@@ -96,7 +96,7 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		cairo_glyph_t cairoGlyph;
 
 		cairoGlyph.index 	= glyphInfo[index].codepoint;
-		cairoGlyph.x 		= x + (glyphPosition[index].x_offset / 64);
+		cairoGlyph.x 		= x + 1 + (glyphPosition[index].x_offset / 64);
 		cairoGlyph.y 		= y - (glyphPosition[index].y_offset / 64);
 
 		x += glyphPosition[index].x_advance / 64;
@@ -113,15 +113,30 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	cairo_surface_t * 	 cairoSurface;
 
 	cairo_scaled_font_glyph_extents(scaledFont, &cairoGlyphs[0], glyphCount, &cairoTextExtents);
-	pixelWidth = cairoTextExtents.width + 1;
-	pixelHeight = cairoTextExtents.height + 1;
+	pixelWidth = cairoTextExtents.width + 2;
+	pixelHeight = cairoTextExtents.height + 2;
 
-	// adjust the baseline positioning if the extents of our specific glyphs are smaller than the full font extents
+	// reposition glyphs based on actual text extents
+	int offset = 0;
 	if (cairoTextExtents.height < cairoExtents.height) {
-		size_t offset = (cairoExtents.height - cairoTextExtents.height) / 2;
+		offset = (cairoExtents.height - cairoTextExtents.height) / -2;
+	}
+	else if (cairoTextExtents.height > cairoExtents.height) {
+		offset = (cairoTextExtents.height - cairoExtents.height) / -2;
+	}
+	if (cairoTextExtents.height + cairoTextExtents.y_bearing == 0) {
+		offset = -offset;
+	}
+	if (offset != 0 || cairoTextExtents.x_bearing < 0) {
 		for (size_t index = 0; index < glyphCount; ++index) {
-			cairoGlyphs[index].y -= offset;
-		}
+			if (offset != 0) {
+				cairoGlyphs[index].y -= offset;
+			}
+			// shift to the right to compensate for any overhang on the left side
+			if (cairoTextExtents.x_bearing < 0) {
+				cairoGlyphs[index].x -= cairoTextExtents.x_bearing;
+			}
+		}		
 	}
 
 	image.reset(new Image(pixelWidth, pixelHeight, 32));
