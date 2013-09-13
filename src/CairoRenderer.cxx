@@ -21,6 +21,8 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
+
 
 CairoRenderer::CairoRenderer(bool debug, bool gracefulEmpty, bool missing) : 
 	Renderer(debug, gracefulEmpty, missing) 
@@ -77,67 +79,47 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	hb_buffer_add_utf8(harfBuffer, txt.c_str(), txt.size(), 0, txt.size());
 	hb_shape(harfFont, harfBuffer, NULL, 0);
 
-	unsigned int 				glyphCount = 0;
-	hb_glyph_info_t * 			glyphInfo;
-	hb_glyph_position_t * 		glyphPosition;
-	std::vector<cairo_glyph_t> 	cairoGlyphs;
-	cairo_font_extents_t 		cairoExtents;
+	unsigned int 						glyphCount 	= 0;
+	hb_glyph_info_t * 					glyphInfo;
+	hb_glyph_position_t * 				glyphPosition;
+	std::vector<cairo_glyph_t> 			cairoGlyphs;
+	size_t 				 				pixelWidth 	= 2; // 1px border on each side
+	size_t 				 				pixelHeight = 0;
+	size_t 								x 			= 1; // 1st glyph positioned after left border
+	cairo_text_extents_t 				cairoGlyphExtent;
+	double								baseline;
 
-	glyphInfo = hb_buffer_get_glyph_infos(harfBuffer, &glyphCount);
-	glyphPosition = hb_buffer_get_glyph_positions(harfBuffer, &glyphCount);
+	glyphInfo 		= hb_buffer_get_glyph_infos(harfBuffer, &glyphCount);
+	glyphPosition 	= hb_buffer_get_glyph_positions(harfBuffer, &glyphCount);
 	// preallocate space in the vector for all of the glyphs
 	cairoGlyphs.reserve(glyphCount);
 
-	cairo_scaled_font_extents(scaledFont, &cairoExtents);
-
-	size_t x = 0;
-	size_t y = cairoExtents.height - cairoExtents.descent - 1;
+	// layout glyphs
 	for (size_t index = 0; index < glyphCount; ++index) {
-		cairo_glyph_t cairoGlyph;
+		cairo_glyph_t 		 cairoGlyph;
 
-		cairoGlyph.index 	= glyphInfo[index].codepoint;
-		cairoGlyph.x 		= x + 1 + (glyphPosition[index].x_offset / 64);
-		cairoGlyph.y 		= y - (glyphPosition[index].y_offset / 64);
-
-		x += glyphPosition[index].x_advance / 64;
-		y -= glyphPosition[index].y_advance / 64;
-
-		cairoGlyphs[index] = cairoGlyph;
+		cairoGlyph.index 	 = glyphInfo[index].codepoint;
+		cairoGlyph.x 		 = x + (glyphPosition[index].x_offset / 64);
+		cairoGlyph.y 		 = 0;
+		x 					+= glyphPosition[index].x_advance / 64;
+		cairoGlyphs[index] 	 = cairoGlyph;
 	}
 
-	size_t 				 pixelWidth;
-	size_t 				 pixelHeight;
+	cairo_scaled_font_glyph_extents(scaledFont, &cairoGlyphs[0], glyphCount, &cairoGlyphExtent);
+
+	pixelWidth 	= cairoGlyphExtent.width + 2;
+	pixelHeight = cairoGlyphExtent.height + 2;
+	baseline 	= fabs(cairoGlyphExtent.y_bearing) + 1.0;
+
+	// set vertical positioning & shift x bearing 
+	for (size_t index = 0; index < glyphCount; ++index) {
+		cairoGlyphs[index].y = baseline;
+		cairoGlyphs[index].x -= cairoGlyphExtent.x_bearing;
+	}	
+
 	int 				 stride = 0;
-	cairo_text_extents_t cairoTextExtents;
 	cairo_t * 			 cairoContext;
 	cairo_surface_t * 	 cairoSurface;
-
-	cairo_scaled_font_glyph_extents(scaledFont, &cairoGlyphs[0], glyphCount, &cairoTextExtents);
-	pixelWidth = cairoTextExtents.width + 2;
-	pixelHeight = cairoTextExtents.height + 2;
-
-	// reposition glyphs based on actual text extents
-	int offset = 0;
-	if (cairoTextExtents.height < cairoExtents.height) {
-		offset = (cairoExtents.height - cairoTextExtents.height) / -2;
-	}
-	else if (cairoTextExtents.height > cairoExtents.height) {
-		offset = (cairoTextExtents.height - cairoExtents.height) / -2;
-	}
-	if (cairoTextExtents.height + cairoTextExtents.y_bearing == 0) {
-		offset = -offset;
-	}
-	if (offset != 0 || cairoTextExtents.x_bearing < 0) {
-		for (size_t index = 0; index < glyphCount; ++index) {
-			if (offset != 0) {
-				cairoGlyphs[index].y -= offset;
-			}
-			// shift to the right to compensate for any overhang on the left side
-			if (cairoTextExtents.x_bearing < 0) {
-				cairoGlyphs[index].x -= cairoTextExtents.x_bearing;
-			}
-		}		
-	}
 
 	image.reset(new Image(pixelWidth, pixelHeight, 32));
 	stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, pixelWidth);
@@ -153,6 +135,7 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	//cairo_set_font_face(cairoContext, cairoFace);
 	cairo_set_scaled_font(cairoContext, scaledFont);
 	cairo_set_font_size(cairoContext, font.pointSize());
+	//cairo_move_to(cairoContext, 0, baseline);
 	cairo_show_glyphs(cairoContext, &cairoGlyphs[0], glyphCount);
 
 	// all done! clean up after ourselves.
