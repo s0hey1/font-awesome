@@ -22,6 +22,7 @@
 #include <boost/program_options.hpp>
 
 
+
 int main (int argc, char * argv[]) {
 	int fontSize;
 	std::string filename;
@@ -78,7 +79,20 @@ int main (int argc, char * argv[]) {
 		return EXIT_SUCCESS;
 	}
 	if (argMap.count("version")) {
+		int major;
+		int minor;
+		int patch;
+
+		FT_Error error;
+		FT_Library library;
+		if ((error = FT_Init_FreeType(&library)) != 0) {
+			throw FontAwesomeException("Error initializing freetype library!");
+		}
+		FT_Library_Version(library, &major, &minor, &patch);
+
 		std::wcout << "font-awesome version " << FONTAWESOME_VERSION << std::endl;
+		std::wcout << "FreeType2 version " << major << "." << minor << "." << patch << std::endl;
+
 		return EXIT_SUCCESS;
 	}
 
