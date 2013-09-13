@@ -82,7 +82,29 @@ void Printer::printMetrics(const std::wstring & text, const FontInfo & info) con
 		arrayChild.clear();
 	}
 
+	std::vector<std::pair<std::wstring, std::wstring> >::const_iterator featureIterator = info.features_.begin();
+	if (info.features_.size() > 0) {
+		std::wstring featureKeyName = mapKeyName(L"OpenType Features");
+		for (; featureIterator != info.features_.end(); ++featureIterator) {
+			childKey = mapKeyName(featureIterator->first);
+			arrayElement.put_value(featureIterator->second);
+			arrayChild.push_back(std::make_pair(childKey, arrayElement));
+		}
+		pt.put_child(featureKeyName, arrayChild);
+		arrayChild.clear();
+	}
 
+	std::vector<std::pair<std::wstring, std::wstring> >::const_iterator scriptIterator = info.scripts_.begin();
+	if (info.scripts_.size() > 0) {
+		std::wstring scriptKeyName = mapKeyName(L"OpenType Scripts");
+		for (; scriptIterator != info.scripts_.end(); ++scriptIterator) {
+			childKey = mapKeyName(scriptIterator->first);
+			arrayElement.put_value(scriptIterator->second);
+			arrayChild.push_back(std::make_pair(childKey, arrayElement));
+		}
+		pt.put_child(scriptKeyName, arrayChild);
+		arrayChild.clear();
+	}
 
 	std::vector<wchar_t>::const_iterator it = info.charmap_.begin();
 	std::wstring charmapKeyName = mapKeyName(L"Character Map");
