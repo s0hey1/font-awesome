@@ -19,12 +19,13 @@ Image::Image() :
 	format_(FORMAT_RGB) {
 }
 
-Image::Image(unsigned int w, unsigned int h, unsigned int b) : 
+Image::Image(size_t w, size_t h, size_t b) : 
+	bpp_(b),
 	width_(w), 
-	height_(h), 
-	bpp_(b) {
-	unsigned int bytesPerPixel	= bpp_ / 8;
-	unsigned int size = width_ * height_ * bytesPerPixel;
+	height_(h)
+{
+	size_t bytesPerPixel	= bpp_ / 8;
+	size_t size = width_ * height_ * bytesPerPixel;
 	if (bytesPerPixel == 3)
 	{
 		format_ = FORMAT_RGB;
@@ -38,9 +39,10 @@ Image::Image(unsigned int w, unsigned int h, unsigned int b) :
 }
 
 Image::Image(unsigned long len) : 
+	bpp_(0),
 	width_(0), 
-	height_(0), 
-	bpp_(0) {
+	height_(0)
+{
 	data_ = new unsigned char [len];
 	memset(data_, 0, len);
 }
@@ -54,15 +56,15 @@ unsigned char * Image::data() {
 	return data_;
 }
 
-unsigned int Image::bpp() const {
+size_t Image::bpp() const {
 	return bpp_;
 }
 
-unsigned int Image::width() const {
+size_t Image::width() const {
 	return width_;
 }
 
-unsigned int Image::height() const {
+size_t Image::height() const {
 	return height_;
 }
 
@@ -70,26 +72,52 @@ Image::ImageFormat Image::format() const {
 	return format_;
 }
 
-void Image::bpp(unsigned int bits) {
+void Image::bpp(size_t bits) {
 	bpp_ = bits;
 }
 
-void Image::width(unsigned int w) {
+void Image::width(size_t w) {
 	width_ = w;
 }
 
-void Image::height(unsigned int h) {
+void Image::height(size_t h) {
 	height_ = h;
 }
 
-unsigned char & Image::operator[] (unsigned int i) {
+unsigned char & Image::operator[] (size_t i) {
 	assert(i < (width_ * height_ * (bpp_ / 8)));
 	assert(data_ != 0);
 	return data_[i];
 }
 
-unsigned char Image::operator[] (unsigned int i) const {
+unsigned char Image::operator[] (size_t i) const {
 	assert(i < (width_ * height_ * (bpp_ / 8)));
 	assert(data_ != 0);
 	return data_[i];
+}
+
+
+void Image::copy(const boost::shared_ptr<Image> & image, size_t x, size_t y, size_t width, size_t height) {
+	assert (x < width);
+	assert (y < height);
+	size_t stride = bpp_ / 8;
+	for (unsigned int row = 0; row < height; row++) {
+		unsigned char * dest = data_ + x + std::min(y + row, height - 1) * stride;
+		unsigned char * src = image->data() + row * stride;
+		if (x + width <= width) {
+			for (size_t col = 0; col < width; col++) {
+				*dest++ = *src++;
+			}
+		}
+		else {
+			size_t limit = width - x;
+			for (size_t col = 0; col < limit; col++) {
+				*dest++ = *src++;
+			}
+			*src--;
+			for (size_t col = limit; col < width; col++) {
+				*dest++ = *src;
+			}
+		}
+	}
 }

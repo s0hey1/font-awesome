@@ -14,6 +14,9 @@ PixelRenderer::PixelRenderer(bool debug, bool gracefulEmpty, bool missing) :
 {
 }
 
+void PixelRenderer::features(const std::vector<std::string> & features) {
+	throw new FontAwesomeException("OpenType features unsupported in pixel renderer.");
+}
 
 boost::shared_ptr<Image> PixelRenderer::render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor) {
 	Font::Range range = font.size(text);

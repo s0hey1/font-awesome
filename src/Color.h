@@ -39,6 +39,11 @@ class Color {
 
 		float floatVal(Channel channel) const;
 
+		/**
+		 * Dot product of two color values
+		 */ 
+		float dot(const Color & color) const;
+
 	private:
 		unsigned char red_;
 		unsigned char green_;

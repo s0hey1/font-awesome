@@ -108,6 +108,10 @@ The default mode is to send the PNG image data directly to STDOUT.  In some situ
 The text color can be controlled via the _--color_ and _--emptycolor_ options.  The arguments should be hex formatted RGBA color values.  The _--emptycolor_ option can be used to control the color used to render missing character glyphs.  By default missing glyphs will be rendered using the same color as normal characters.
 
 
+### OpenType Features
+
+The Cairo backend supports enabling different OpenType feature tags available in fonts via the _--feature_ flag.  This flag can be used multiple times, once per (Feature Tag)[http://partners.adobe.com/public/developer/opentype/index_tag3.html] you want to use.  The available features are enumerated within the "opentype_features" section of th _--metrics_ option's output.
+
 ### Metrics
 
 There are several options for querying information about fonts.  The _--metrics_ flag will switch from outputting image data to displaying information about the text input string and the font itself.  The output information includes the total number of glyphs in the font and the count of characters in the text input which have corresponding renderable glyphs.  The _--glyphinfo_ option can be used to display information about a single glyph corresponding to the option's argument.  When paired with the _--showempty_ flag, information about the missing glyph will be displayed instead of the specified character glyph.  The format of the output data is either JSON or XML depending on whether the _--json_ or _--xml_ flag is used.  If the _--codepoints_ flag is included then the character map data will list the Unicode code points instead of the actual characters.

@@ -17,6 +17,7 @@ class PixelRenderer : public Renderer {
 		PixelRenderer(bool debug, bool gracefulEmpty, bool missing);
 
 		boost::shared_ptr<Image> render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor);
+		void features(const std::vector<std::string> & features);
 
 	protected:
 		void blit(const boost::shared_ptr<Image> & image, const Glyph & glyph, const Color & color);

@@ -20,6 +20,16 @@ Color::Color(const std::string & hex) {
 	fromHex(hex);
 }
 
+float Color::dot(const Color & color) const {
+	return 
+		floatVal(CHANNEL_RED) * color.floatVal(CHANNEL_RED) +
+		floatVal(CHANNEL_GREEN) * color.floatVal(CHANNEL_GREEN) +
+		floatVal(CHANNEL_BLUE) * color.floatVal(CHANNEL_BLUE) +
+		floatVal(CHANNEL_ALPHA) * color.floatVal(CHANNEL_ALPHA)
+	;
+}
+
+
 float Color::floatVal(Channel channel) const {
 	unsigned char c;
 	switch (channel) {

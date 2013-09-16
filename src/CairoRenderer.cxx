@@ -55,9 +55,14 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	scaledFont = cairo_scaled_font_create(cairoFace, &fontMatrix, &ctm, fontOptions);
 	scaledFTFace = cairo_ft_scaled_font_lock_face(scaledFont);
 
-	hb_font_t * 	harfFont;
-	hb_buffer_t * 	harfBuffer;
-	const char * 	language = "en";
+	hb_font_t * 				harfFont;
+	hb_buffer_t * 				harfBuffer;
+	hb_feature_t *				harfFeatures 	= NULL;
+	size_t						featureCount 	= 0;
+	std::vector<hb_feature_t> 	features;
+	const char * 				language 		= "en_US.UTF-8";
+	const char * 				direction 		= NULL;
+	const char * 				script 			= NULL;
 
 	harfFont = hb_ft_font_create(scaledFTFace, NULL);
 	//hb_face_t * harfFace;
@@ -65,10 +70,50 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	harfBuffer = hb_buffer_create();
 	hb_buffer_set_unicode_funcs(harfBuffer, hb_icu_get_unicode_funcs());
 	// options are: HB_DIRECTION_LTR, HB_DIRECTION_RTL, HB_DIRECTION_TTB
-	hb_buffer_set_direction(harfBuffer, HB_DIRECTION_LTR);
+	hb_buffer_set_direction(harfBuffer, hb_direction_from_string (direction, -1));
 	// options: HB_SCRIPT_LATIN, HB_SCRIPT_ARABIC, HB_SCRIPT_HAN - see hb-unicode.h
-	hb_buffer_set_script(harfBuffer, HB_SCRIPT_LATIN);
-	hb_buffer_set_language(harfBuffer, hb_language_from_string(language, strlen(language)));
+	hb_buffer_set_script(harfBuffer, hb_script_from_string(script, -1));
+	hb_buffer_set_language(harfBuffer, hb_language_from_string(language, -1));
+	hb_buffer_set_flags(harfBuffer, HB_BUFFER_FLAG_DEFAULT);
+	hb_buffer_guess_segment_properties(harfBuffer);
+
+	const char ** shapers = hb_shape_list_shapers();
+	if (debug()) {
+		std::cout << "Available shapers:";
+		for (; *shapers; shapers++) {
+			std::wcout << " " << *shapers;
+		}
+		std::cout << std::endl;
+	}
+
+	if (features_.size() > 0) {
+		featureCount = features_.size();
+		features.reserve(featureCount);
+		if (debug()) {
+			std::cout << "Attempting to enable [" << featureCount << "] OpenType features." << std::endl;
+		}
+		for (size_t index = 0; index < featureCount; ++index) {
+			hb_feature_t feature;
+			if (hb_feature_from_string(features_[index].c_str(), -1, &feature)) {
+				features.push_back(feature);
+				if (debug()) {
+					std::cout << "Enabled OpenType feature tag [" << features_[index] << "]." << std::endl;
+				}
+			}
+			else {
+				if (debug()) {
+					std::cout << "Could not enable OpenType feature tag [" << features_[index] << "]." << std::endl;
+				}
+			}
+		}
+		if (features.size() > 0) {
+			featureCount = features.size();
+			harfFeatures = &features[0];
+			if (debug()) {
+				std::cout << "Enabled [" << featureCount << "] OpenType feature tags." << std::endl;
+			}
+		}
+	}
 
 	// Layout the text
 	//hb_buffer_add_utf8(harfBuffer, reinterpret_cast<const char *>(text.c_str()), text.size(), 0, text.size());
@@ -77,7 +122,8 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	ucs = icu::UnicodeString::fromUTF32(reinterpret_cast<const UChar32*>(text.c_str()), text.size());
 	txt = ucs.toUTF8String(txt);
 	hb_buffer_add_utf8(harfBuffer, txt.c_str(), txt.size(), 0, txt.size());
-	hb_shape(harfFont, harfBuffer, NULL, 0);
+
+	hb_shape_full(harfFont, harfBuffer, harfFeatures, featureCount, NULL); //shapers);
 
 	unsigned int 						glyphCount 	= 0;
 	hb_glyph_info_t * 					glyphInfo;
@@ -150,4 +196,7 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	return image;
 }
 
+void CairoRenderer::features(const std::vector<std::string> & features) {
+	features_ = features;
+}
 

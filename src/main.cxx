@@ -44,6 +44,7 @@ int main (int argc, char * argv[]) {
 	bool showEmptyInfo		 = false;
 	std::string glyphChar;
 	Printer::Format format 	 = Printer::FORMAT_RAW;
+	std::vector<std::string> features;
 
 	// setup option parser
 	boost::program_options::options_description optsDesc("Allowed options");
@@ -66,6 +67,7 @@ int main (int argc, char * argv[]) {
 		("json,j", "output metric data in JSON format")
 		("xml,x", "output metric data in XML format")
 		("backend,b", boost::program_options::value<std::string>(&backend)->default_value("pixel"), "specify font rendering backend (pixel or cairo)")
+		("feature", boost::program_options::value<std::vector<std::string> >(&features), "specify OpenType features to enable")
 	;
 
 	// parse options
@@ -244,6 +246,9 @@ int main (int argc, char * argv[]) {
 		else if (backend == "cairo") {
 			renderer.reset(new CairoRenderer(debug, gracefulEmptyOutput, fixMissingGlyph));
 			flip = true;
+			if (argMap.count("feature")) {
+				renderer->features(features);
+			}
 		}
 		else {
 			std::cerr << "Unsupported rendering backend: " << backend << std::endl;

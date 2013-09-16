@@ -31,6 +31,7 @@ class Renderer {
 		virtual ~Renderer();
 
 		virtual boost::shared_ptr<Image> render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor) = 0;
+		virtual void features(const std::vector<std::string> & features) = 0;
 
 		bool debug() const;
 		bool gracefulEmpty() const;
