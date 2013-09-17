@@ -157,6 +157,10 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	pixelHeight = cairoGlyphExtent.height + 2;
 	baseline 	= fabs(cairoGlyphExtent.y_bearing) + 1.0;
 
+	if (debug()) {
+		std::wcout << L"Glyph baseline at [" << baseline << L"]. X bearing [" << cairoGlyphExtent.x_bearing << L"]" << std::endl;
+	}
+
 	// set vertical positioning & shift x bearing 
 	for (size_t index = 0; index < glyphCount; ++index) {
 		cairoGlyphs[index].y = baseline;
