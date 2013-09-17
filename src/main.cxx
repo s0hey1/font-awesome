@@ -167,7 +167,7 @@ int main (int argc, char * argv[]) {
 	if (!showGlyphInfo) {
 		if (useCodePoints) {
 			if (debug) {
-				std::wcout << "using codepoints" << std::endl;
+				std::wcout << "Using codepoints" << std::endl;
 			}
 			std::string characters;
 			while (std::cin.good()) {
@@ -191,7 +191,6 @@ int main (int argc, char * argv[]) {
 	// create font
 	try {
 		Font font(filename, fontSize);
-
 		if (fixMissingGlyph) {
 			if (font.missingExists()) {
 				if (verbose) {

@@ -79,11 +79,11 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 
 	const char ** shapers = hb_shape_list_shapers();
 	if (debug()) {
-		std::cout << "Available shapers:";
+		std::wcout << L"Available shapers:";
 		for (; *shapers; shapers++) {
 			std::wcout << " " << *shapers;
 		}
-		std::cout << std::endl;
+		std::wcout << std::endl;
 	}
 
 	if (features_.size() > 0) {
@@ -168,6 +168,11 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	cairo_surface_t * 	 cairoSurface;
 
 	image.reset(new Image(pixelWidth, pixelHeight, 32));
+
+	if (debug()) {
+		std::wcout << L"Allocated image space [" << pixelWidth << L"x" << pixelHeight << L"]" << std::endl;
+	}
+
 	stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, pixelWidth);
 	cairoSurface = cairo_image_surface_create_for_data(image->data(), CAIRO_FORMAT_ARGB32, pixelWidth, pixelHeight, stride);
 	cairoContext = cairo_create(cairoSurface);
@@ -178,10 +183,13 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		color.floatVal(Color::CHANNEL_RED), 
 		color.floatVal(Color::CHANNEL_ALPHA)
 	);
-	//cairo_set_font_face(cairoContext, cairoFace);
 	cairo_set_scaled_font(cairoContext, scaledFont);
 	cairo_set_font_size(cairoContext, font.pointSize());
-	//cairo_move_to(cairoContext, 0, baseline);
+
+	if (debug()) {
+		std::wcout << L"Rendering [" << glyphCount << L"] glyphs at size [" << font.pointSize() << L"]" << std::endl;
+	}
+
 	cairo_show_glyphs(cairoContext, &cairoGlyphs[0], glyphCount);
 
 	// all done! clean up after ourselves.
