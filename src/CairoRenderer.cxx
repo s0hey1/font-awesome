@@ -41,6 +41,9 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 
 	// wrap freetype font face in a cairo face object
 	cairoFace = cairo_ft_font_face_create_for_ft_face(font.face(), 0);
+	if (cairo_font_face_status(cairoFace) != CAIRO_STATUS_SUCCESS) {
+		throw new FontAwesomeException("Could not create cairo face!");
+	}
 
 	// setup default transformation matrices
 	cairo_matrix_init_identity(&ctm);
@@ -50,10 +53,19 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_FULL);
 	cairo_font_options_set_hint_metrics(fontOptions, CAIRO_HINT_METRICS_ON);
 	cairo_font_options_set_antialias(fontOptions, CAIRO_ANTIALIAS_SUBPIXEL);
+	if (cairo_font_options_status(fontOptions) != CAIRO_STATUS_SUCCESS) {
+		throw new FontAwesomeException("Bad cairo font options!");
+	}
 
 	// scale the face
 	scaledFont = cairo_scaled_font_create(cairoFace, &fontMatrix, &ctm, fontOptions);
+	if (cairo_scaled_font_status(scaledFont) != CAIRO_STATUS_SUCCESS) {
+		throw new FontAwesomeException("Could not create scaled font!");
+	}
 	scaledFTFace = cairo_ft_scaled_font_lock_face(scaledFont);
+	if (scaledFTFace == NULL) {
+		throw new FontAwesomeException("Font could not be locked!");
+	}
 
 	hb_font_t * 				harfFont;
 	hb_buffer_t * 				harfBuffer;
@@ -161,6 +173,19 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		std::wcout << L"Glyph baseline at [" << baseline << L"]. X bearing [" << cairoGlyphExtent.x_bearing << L"]" << std::endl;
 	}
 
+	if (pixelWidth == 0) {
+		pixelWidth = 1;
+		if (debug()) {
+			std::wcout << L"Zero width image!" << std::endl;
+		}
+	}
+	if (pixelHeight == 0) {
+		pixelHeight = 1;
+		if (debug()) {
+			std::wcout << L"Zero height image!" << std::endl;
+		}
+	}
+
 	// set vertical positioning & shift x bearing 
 	for (size_t index = 0; index < glyphCount; ++index) {
 		cairoGlyphs[index].y = baseline;
@@ -194,7 +219,15 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		std::wcout << L"Rendering [" << glyphCount << L"] glyphs at size [" << font.pointSize() << L"]" << std::endl;
 	}
 
+	if (cairo_status(cairoContext) != CAIRO_STATUS_SUCCESS) {
+		throw new FontAwesomeException("Bad cairo context state!");
+	}
+
 	cairo_show_glyphs(cairoContext, &cairoGlyphs[0], glyphCount);
+
+	if (cairo_surface_status(cairoSurface) != CAIRO_STATUS_SUCCESS) {
+		throw new FontAwesomeException("Bad cairo surface state!");
+	}
 
 	// all done! clean up after ourselves.
 	cairo_font_options_destroy (fontOptions);
