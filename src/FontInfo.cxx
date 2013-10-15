@@ -204,9 +204,12 @@ void FontInfo::parse(const Font & font, const std::wstring & text) {
 	}
 
 	// populate info about the face itself
-	name_ 				= FT_Get_Postscript_Name(face);
+	// Some TTF fonts cause a segfault in FT when querying for the postscript name so we can't do this :(
+	//name_ 				= FT_Get_Postscript_Name(face);
+
 	haveGlyphNames_ 	= FT_HAS_GLYPH_NAMES(face);
 	multipleMasters_ 	= FT_HAS_MULTIPLE_MASTERS(face);
+
 	glyphCount_ 		= face->num_glyphs;
 	family_ 			= face->family_name;
 	style_ 				= face->style_name;
@@ -218,6 +221,7 @@ void FontInfo::parse(const Font & font, const std::wstring & text) {
 	if (face->style_flags & FT_STYLE_FLAG_ITALIC) {
 		italic_ = true;
 	}
+
 	vertical_ 	= FT_HAS_HORIZONTAL(face);
 	horizontal_ = FT_HAS_VERTICAL(face);
 	kerning_ 	= FT_HAS_KERNING(face);
