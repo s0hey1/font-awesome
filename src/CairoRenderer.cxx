@@ -42,7 +42,7 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	// wrap freetype font face in a cairo face object
 	cairoFace = cairo_ft_font_face_create_for_ft_face(font.face(), 0);
 	if (cairo_font_face_status(cairoFace) != CAIRO_STATUS_SUCCESS) {
-		throw new FontAwesomeException("Could not create cairo face!");
+		throw FontAwesomeException("Could not create cairo face!");
 	}
 
 	// setup default transformation matrices
@@ -52,19 +52,21 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	fontOptions = cairo_font_options_create();
 	cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_FULL);
 	cairo_font_options_set_hint_metrics(fontOptions, CAIRO_HINT_METRICS_ON);
+	//cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_NONE);
+	//cairo_font_options_set_hint_metrics(fontOptions, CAIRO_HINT_METRICS_OFF);
 	cairo_font_options_set_antialias(fontOptions, CAIRO_ANTIALIAS_SUBPIXEL);
 	if (cairo_font_options_status(fontOptions) != CAIRO_STATUS_SUCCESS) {
-		throw new FontAwesomeException("Bad cairo font options!");
+		throw FontAwesomeException("Bad cairo font options!");
 	}
 
 	// scale the face
 	scaledFont = cairo_scaled_font_create(cairoFace, &fontMatrix, &ctm, fontOptions);
 	if (cairo_scaled_font_status(scaledFont) != CAIRO_STATUS_SUCCESS) {
-		throw new FontAwesomeException("Could not create scaled font!");
+		throw FontAwesomeException("Could not create scaled font!");
 	}
 	scaledFTFace = cairo_ft_scaled_font_lock_face(scaledFont);
 	if (scaledFTFace == NULL) {
-		throw new FontAwesomeException("Font could not be locked!");
+		throw FontAwesomeException("Font could not be locked!");
 	}
 
 	hb_font_t * 				harfFont;
@@ -106,8 +108,8 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		}
 		for (size_t index = 0; index < featureCount; ++index) {
 			hb_feature_t feature;
-			if (hb_feature_from_string(features_[index].c_str(), -1, &feature)) {
-				features.push_back(feature);
+			features.push_back(feature);
+			if (hb_feature_from_string(features_[index].c_str(), -1, &features[index])) {
 				if (debug()) {
 					std::cout << "Enabled OpenType feature tag [" << features_[index] << "]." << std::endl;
 				}
@@ -220,13 +222,13 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	}
 
 	if (cairo_status(cairoContext) != CAIRO_STATUS_SUCCESS) {
-		throw new FontAwesomeException("Bad cairo context state!");
+		throw FontAwesomeException("Bad cairo context state!");
 	}
 
 	cairo_show_glyphs(cairoContext, &cairoGlyphs[0], glyphCount);
 
 	if (cairo_surface_status(cairoSurface) != CAIRO_STATUS_SUCCESS) {
-		throw new FontAwesomeException("Bad cairo surface state!");
+		throw FontAwesomeException("Bad cairo surface state!");
 	}
 
 	// all done! clean up after ourselves.

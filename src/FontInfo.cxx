@@ -244,7 +244,7 @@ void FontInfo::parse(const Font & font, const std::wstring & text) {
 
 		if (haveGlyphNames_) {
 			if (FT_Get_Glyph_Name(face, glyphIndex, glyphBuffer, 255) != 0) {
-				throw new FontAwesomeException("Error getting glyph name.");
+				throw FontAwesomeException("Error getting glyph name.");
 			}
 			glyphNames_.push_back(glyphBuffer);
 		}
