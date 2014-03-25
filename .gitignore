@@ -36,3 +36,7 @@ libtool
 .dirstamp
 Makefile
 tests/unit_tests
+config.lt
+src/glyphtest
+tests/data/extra
+tests/extra
