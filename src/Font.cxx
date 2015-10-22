@@ -70,10 +70,10 @@ Font::Range Font::size(const std::wstring & text) const {
 	pen.y = 0;
 
 	// Measure glyphs first, to see how big of a canvas we need
-	int minx = 0;
-	int miny = 0;
-	int maxx = 0;
-	int maxy = 0;
+	unsigned int minx = 0;
+	unsigned int miny = 0;
+	unsigned int maxx = 0;
+	unsigned int maxy = 0;
 	size_t textLength = text.length();
 	for (size_t i = 0; i < textLength; i++) {
 		FT_Set_Transform(face_, NULL, &pen);
