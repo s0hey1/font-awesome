@@ -1,0 +1,11 @@
+Source: font-awesome
+Maintainer: Joshua Farr <josh@creativemarket.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: font-awesome
+Architecture: amd64
+Depends: libpng12 libfreetype6 libboost-program-options1.54.0 libicu52 libcairo2 libharfbuzz-icu0 libharfbuzz0b libpixman-1-0 libfontconfig1
+Description: font rendering library.
