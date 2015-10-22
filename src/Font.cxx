@@ -62,8 +62,8 @@ void Font::release() {
 Font::Range Font::size(const std::wstring & text) const {
 	FT_Vector pen;
 	FT_GlyphSlot slot;
-	int top;
-	int left;
+	unsigned int top;
+	unsigned int left;
 	slot = face_->glyph;
 
 	pen.x = 0;
