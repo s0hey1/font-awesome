@@ -99,8 +99,8 @@ Font::Range Font::size(const std::wstring & text) const {
 
 		pen.y += slot->advance.y;
 	}
-	maxx = std::max(maxx, static_cast<int>(pen.x / penDPI_));
-	maxy = std::max(maxy, static_cast<int>(pen.y / penDPI_));
+	maxx = std::max(maxx, static_cast<unsigned int>(pen.x / penDPI_));
+	maxy = std::max(maxy, static_cast<unsigned int>(pen.y / penDPI_));
 
 	Range range;
 	range.size_ = Glyph::Vector(maxx - minx, maxy - miny);
