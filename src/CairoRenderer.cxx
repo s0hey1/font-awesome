@@ -198,7 +198,9 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	cairo_t * 			 cairoContext;
 	cairo_surface_t * 	 cairoSurface;
 
-	image.reset(new Image(pixelWidth + padWidth(), pixelHeight + padHeight(), 32));
+	pixelWidth += padWidth();
+	pixelHeight += padHeight();
+	image.reset(new Image(pixelWidth, pixelHeight, 32));
 
 	if (debug()) {
 		std::wcout << L"Allocated image space [" << pixelWidth << L"x" << pixelHeight << L"]" << std::endl;
@@ -221,13 +223,14 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		std::wcout << L"Rendering [" << glyphCount << L"] glyphs at size [" << font.pointSize() << L"]" << std::endl;
 	}
 
+	cairo_status_t cairoStatus = cairo_surface_status(cairoSurface);
 	if (cairo_status(cairoContext) != CAIRO_STATUS_SUCCESS) {
-		throw FontAwesomeException("Bad cairo context state!");
+		throw FontAwesomeException(std::string("Bad cairo context state! - ") + std::string(cairo_status_to_string(cairoStatus)));
 	}
 
 	cairo_show_glyphs(cairoContext, &cairoGlyphs[0], glyphCount);
 
-	cairo_status_t cairoStatus = cairo_surface_status(cairoSurface);
+	cairoStatus = cairo_surface_status(cairoSurface);
 	if (cairoStatus != CAIRO_STATUS_SUCCESS) {
 		throw FontAwesomeException(std::string("Bad cairo surface state! - ") + std::string(cairo_status_to_string(cairoStatus)));
 	}
