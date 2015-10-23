@@ -227,8 +227,9 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 
 	cairo_show_glyphs(cairoContext, &cairoGlyphs[0], glyphCount);
 
-	if (cairo_surface_status(cairoSurface) != CAIRO_STATUS_SUCCESS) {
-		throw FontAwesomeException("Bad cairo surface state!");
+	cairo_status_t cairoStatus = cairo_surface_status(cairoSurface);
+	if (cairoStatus != CAIRO_STATUS_SUCCESS) {
+		throw FontAwesomeException(std::string("Bad cairo surface state! - ") + std::string(cairo_status_to_string(cairoStatus)));
 	}
 
 	// all done! clean up after ourselves.
