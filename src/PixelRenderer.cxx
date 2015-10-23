@@ -10,7 +10,7 @@
 #include <iostream>
 
 PixelRenderer::PixelRenderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight) : 
-	Renderer(debug, gracefulEmpty, missing, int padWidth, int padHeight) 
+	Renderer(debug, gracefulEmpty, missing, padWidth, padHeight) 
 {
 }
 
