@@ -9,8 +9,8 @@
 
 #include <iostream>
 
-PixelRenderer::PixelRenderer(bool debug, bool gracefulEmpty, bool missing) : 
-	Renderer(debug, gracefulEmpty, missing) 
+PixelRenderer::PixelRenderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight) : 
+	Renderer(debug, gracefulEmpty, missing, int padWidth, int padHeight) 
 {
 }
 
@@ -40,7 +40,7 @@ boost::shared_ptr<Image> PixelRenderer::render(const Font & font, const Color & 
 		emptyImage = true;
 	}
 
-	image.reset(new Image(range.size_.first, range.size_.second, 32));
+	image.reset(new Image(range.size_.first + padWidth(), range.size_.second + padHeight(), 32));
 
 	if (emptyImage) {
 		return image;

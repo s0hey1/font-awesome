@@ -9,10 +9,12 @@
 
 #include <iostream>
 
-Renderer::Renderer(bool debug, bool gracefulEmpty, bool missing) :
+Renderer::Renderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight) :
 	debug_(debug),
 	gracefulEmpty_(gracefulEmpty),
-	missing_(missing)
+	missing_(missing),
+	padWidth_(padWidth),
+	padHeight_(padHeight)
 {
 
 }
@@ -32,4 +34,14 @@ bool Renderer::gracefulEmpty() const {
 
 bool Renderer::missing() const {
 	return missing_;
+}
+
+
+int Renderer::padWidth() const {
+	return padWidth_;
+}
+
+
+int Renderer::padHeight() const {
+	return padHeight_;
 }

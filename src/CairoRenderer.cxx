@@ -24,8 +24,8 @@
 #include <cmath>
 
 
-CairoRenderer::CairoRenderer(bool debug, bool gracefulEmpty, bool missing) : 
-	Renderer(debug, gracefulEmpty, missing) 
+CairoRenderer::CairoRenderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight) : 
+	Renderer(debug, gracefulEmpty, missing, padWidth, padHeight) 
 {
 }
 
@@ -192,13 +192,13 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	for (size_t index = 0; index < glyphCount; ++index) {
 		cairoGlyphs[index].y = baseline;
 		cairoGlyphs[index].x -= cairoGlyphExtent.x_bearing;
-	}	
+	}
 
 	int 				 stride = 0;
 	cairo_t * 			 cairoContext;
 	cairo_surface_t * 	 cairoSurface;
 
-	image.reset(new Image(pixelWidth, pixelHeight, 32));
+	image.reset(new Image(pixelWidth + padWidth(), pixelHeight + padHeight(), 32));
 
 	if (debug()) {
 		std::wcout << L"Allocated image space [" << pixelWidth << L"x" << pixelHeight << L"]" << std::endl;

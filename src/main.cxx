@@ -25,6 +25,8 @@
 
 int main (int argc, char * argv[]) {
 	int fontSize;
+	int padWidth;
+	int padHeight;
 	std::string filename;
 	bool verbose 		 	 = false;
 	bool useCodePoints 		 = false;
@@ -68,6 +70,8 @@ int main (int argc, char * argv[]) {
 		("xml,x", "output metric data in XML format")
 		("backend,b", boost::program_options::value<std::string>(&backend)->default_value("pixel"), "specify font rendering backend (pixel or cairo)")
 		("feature", boost::program_options::value<std::vector<std::string> >(&features), "specify OpenType features to enable")
+		("padWidth", boost::program_options::value<int>(&padWidth)->default_value(0), "add width padding to canvas")
+		("padHeight", boost::program_options::value<int>(&padHeight)->default_value(0), "add height padding to canvas")
 	;
 
 	// parse options
@@ -240,10 +244,10 @@ int main (int argc, char * argv[]) {
 		boost::shared_ptr<Renderer> renderer;
 		bool						flip = false;
 		if (backend == "pixel") {
-			renderer.reset(new PixelRenderer(debug, gracefulEmptyOutput, fixMissingGlyph));
+			renderer.reset(new PixelRenderer(debug, gracefulEmptyOutput, fixMissingGlyph, padWidth, padHeight));
 		}
 		else if (backend == "cairo") {
-			renderer.reset(new CairoRenderer(debug, gracefulEmptyOutput, fixMissingGlyph));
+			renderer.reset(new CairoRenderer(debug, gracefulEmptyOutput, fixMissingGlyph, padWidth, padHeight));
 			flip = true;
 			if (argMap.count("feature")) {
 				renderer->features(features);

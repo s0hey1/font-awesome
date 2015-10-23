@@ -27,7 +27,7 @@ class Renderer {
 		 * @param bool gracefulEmpty
 		 * @param bool missing
 		 */
-		Renderer(bool debug, bool gracefulEmpty, bool missing);
+		Renderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight);
 		virtual ~Renderer();
 
 		virtual boost::shared_ptr<Image> render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor) = 0;
@@ -36,9 +36,13 @@ class Renderer {
 		bool debug() const;
 		bool gracefulEmpty() const;
 		bool missing() const;
+		int padWidth() const;
+		int padHeight() const;
 
 	private:
 		bool debug_;
 		bool gracefulEmpty_;
 		bool missing_;
+		int padWidth_;
+		int padHeight_;
 };
