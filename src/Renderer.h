@@ -33,11 +33,14 @@ class Renderer {
 		virtual boost::shared_ptr<Image> render(const Font & font, const Color & color, const std::wstring & text, const Color & emptyColor) = 0;
 		virtual void features(const std::vector<std::string> & features) = 0;
 
+		void hintStyle(const std::string & style);
+
 		bool debug() const;
 		bool gracefulEmpty() const;
 		bool missing() const;
 		int padWidth() const;
 		int padHeight() const;
+		std::string hintStyle() const;
 
 	private:
 		bool debug_;
@@ -45,4 +48,5 @@ class Renderer {
 		bool missing_;
 		int padWidth_;
 		int padHeight_;
+		std::string hintStyle_;
 };

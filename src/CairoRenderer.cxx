@@ -24,8 +24,8 @@
 #include <cmath>
 
 
-CairoRenderer::CairoRenderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight) : 
-	Renderer(debug, gracefulEmpty, missing, padWidth, padHeight) 
+CairoRenderer::CairoRenderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, int padHeight) :
+	Renderer(debug, gracefulEmpty, missing, padWidth, padHeight)
 {
 }
 
@@ -50,9 +50,14 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	cairo_matrix_init_scale(&fontMatrix, font.pointSize(), font.pointSize());
 
 	fontOptions = cairo_font_options_create();
-	cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_FULL);
+
+	if (hintStyle() == "full") {
+		cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_FULL);
+	} else if (hintStyle() == "none") {
+		cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_NONE);
+	}
+
 	cairo_font_options_set_hint_metrics(fontOptions, CAIRO_HINT_METRICS_ON);
-	//cairo_font_options_set_hint_style(fontOptions, CAIRO_HINT_STYLE_NONE);
 	//cairo_font_options_set_hint_metrics(fontOptions, CAIRO_HINT_METRICS_OFF);
 	cairo_font_options_set_antialias(fontOptions, CAIRO_ANTIALIAS_SUBPIXEL);
 	if (cairo_font_options_status(fontOptions) != CAIRO_STATUS_SUCCESS) {
@@ -188,7 +193,7 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 		}
 	}
 
-	// set vertical positioning & shift x bearing 
+	// set vertical positioning & shift x bearing
 	for (size_t index = 0; index < glyphCount; ++index) {
 		cairoGlyphs[index].y = baseline;
 		cairoGlyphs[index].x -= cairoGlyphExtent.x_bearing;
@@ -210,10 +215,10 @@ boost::shared_ptr<Image> CairoRenderer::render(const Font & font, const Color & 
 	cairoSurface = cairo_image_surface_create_for_data(image->data(), CAIRO_FORMAT_ARGB32, pixelWidth, pixelHeight, stride);
 	cairoContext = cairo_create(cairoSurface);
 	cairo_set_source_rgba(
-		cairoContext, 
-		color.floatVal(Color::CHANNEL_BLUE), 
-		color.floatVal(Color::CHANNEL_GREEN), 
-		color.floatVal(Color::CHANNEL_RED), 
+		cairoContext,
+		color.floatVal(Color::CHANNEL_BLUE),
+		color.floatVal(Color::CHANNEL_GREEN),
+		color.floatVal(Color::CHANNEL_RED),
 		color.floatVal(Color::CHANNEL_ALPHA)
 	);
 	cairo_set_scaled_font(cairoContext, scaledFont);

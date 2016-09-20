@@ -14,7 +14,8 @@ Renderer::Renderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, i
 	gracefulEmpty_(gracefulEmpty),
 	missing_(missing),
 	padWidth_(padWidth),
-	padHeight_(padHeight)
+	padHeight_(padHeight),
+	hintStyle_("full")
 {
 
 }
@@ -22,6 +23,15 @@ Renderer::Renderer(bool debug, bool gracefulEmpty, bool missing, int padWidth, i
 Renderer::~Renderer() {
 
 }
+
+void Renderer::hintStyle(const std::string & style) {
+	hintStyle_ = style;
+}
+
+std::string Renderer::hintStyle() const {
+	return hintStyle_;
+}
+
 
 bool Renderer::debug() const {
 	return debug_;

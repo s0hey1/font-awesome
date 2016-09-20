@@ -32,6 +32,7 @@ int main (int argc, char * argv[]) {
 	bool useCodePoints 		 = false;
 	std::string hexColor;
 	std::string hexEmptyColor;
+	std::string hintStyle;
 	bool fixMissingGlyph 	 = false;
 	bool gracefulEmptyOutput = false;
 	bool debug 				 = false;
@@ -60,6 +61,7 @@ int main (int argc, char * argv[]) {
 		("emptycolor", boost::program_options::value<std::string>(&hexEmptyColor), "empty glyph color (in RGBA hex)")
 		("filename,f", boost::program_options::value<std::string>(&filename), "font filename")
 		("fontsize,s", boost::program_options::value<int>(&fontSize)->default_value(32), "font size in points")
+		("hint", boost::program_options::value<std::string>(&hintStyle), "type of hinting for font outlines (none or full)")
 		("codepoints", "text specified as unicode code points")
 		("debug", "only query the required canvas size to render text")
 		("metrics", "output font metrics instead of a rendered image")
@@ -251,6 +253,13 @@ int main (int argc, char * argv[]) {
 			flip = true;
 			if (argMap.count("feature")) {
 				renderer->features(features);
+			}
+			if (argMap.count("hint")) {
+				if (hint != "none" && hint != "full") {
+					std::cerr << "Unrecognized hint style: " << hint << std::endl;
+					return EXIT_FAILURE;
+				}
+				renderer->hintStyle(hintStyle);
 			}
 		}
 		else {
