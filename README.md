@@ -116,8 +116,21 @@ The Cairo backend supports enabling different OpenType feature tags available in
 
 There are several options for querying information about fonts.  The _--metrics_ flag will switch from outputting image data to displaying information about the text input string and the font itself.  The output information includes the total number of glyphs in the font and the count of characters in the text input which have corresponding renderable glyphs.  The _--glyphinfo_ option can be used to display information about a single glyph corresponding to the option's argument.  When paired with the _--showempty_ flag, information about the missing glyph will be displayed instead of the specified character glyph.  The format of the output data is either JSON or XML depending on whether the _--json_ or _--xml_ flag is used.  If the _--codepoints_ flag is included then the character map data will list the Unicode code points instead of the actual characters.
 
+# Packaging
 
-# Issues 
+Ubuntu packages can be built:
+
+
+```sh
+sudo apt-get install build-essential devscripts debhelper
+mv font-awesome font-awesome-1.0.2
+tar czvf font-awesome_1.0.2.orig.tar.gz font-awesome-1.0.2/
+cd font-awesome-1.0.2/
+dch --create -v 1.0.2-1 --package font-awesome
+debuild -us -uc
+```
+
+# Issues
 
 * Fix Python version (it used to segfault, and now it doesn't but it also no longer works right)
 * On OS X, if there are runtime crash issues with boost and libc, it may be necessary to install boost from source instead of relying on the prepackaged homebrew version.
@@ -137,5 +150,5 @@ MIT
 
 Extra m4 sugar from:
 
-* https://github.com/RhysU/autoconf-boost.m4 
+* https://github.com/RhysU/autoconf-boost.m4
 * http://github.com/tsuna/boost.m4
