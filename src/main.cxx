@@ -256,7 +256,7 @@ int main (int argc, char * argv[]) {
 			}
 			if (argMap.count("hint")) {
 				if (hintStyle != "none" && hintStyle != "full") {
-					std::cerr << "Unrecognized hint style: " << hint << std::endl;
+					std::cerr << "Unrecognized hint style: " << hintStyle << std::endl;
 					return EXIT_FAILURE;
 				}
 				renderer->hintStyle(hintStyle);
