@@ -7,5 +7,5 @@ Build-Depends: debhelper (>= 9)
 
 Package: font-awesome
 Architecture: amd64
-Depends: libpng12-0, libfreetype6, libboost-program-options1.54.0, libicu52, libcairo2, libharfbuzz-icu0, libharfbuzz0b, libpixman-1-0, libfontconfig1
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${dist:Depends}
 Description: font rendering library.
