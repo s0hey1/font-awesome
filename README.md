@@ -124,6 +124,9 @@ Ubuntu packages can be built:
 ```sh
 sudo apt-get install build-essential devscripts debhelper
 mv font-awesome font-awesome-1.0.2
+cd font-awesome-1.0.2/
+./autogen.sh
+cd ..
 tar czvf font-awesome_1.0.2.orig.tar.gz font-awesome-1.0.2/
 cd font-awesome-1.0.2/
 dch --create -v 1.0.2-1 --package font-awesome
